@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Add Employee | Payroll System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons CDN for eye icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #343a40;
+        }
+
+        .sidebar a {
+            color: #fff;
+            padding: 12px 20px;
+            display: block;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        /* Style for input group button to remove border on left */
+        .input-group-text {
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 sidebar">
+                <div class="pt-3">
+                    <h5 class="text-white text-center">Admin</h5>
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="employees.html">Employees</a>
+                    <a href="add_employee.html">Add Employee</a>
+                    <a href="payroll.html">Payroll</a>
+                    <a href="attendance.html">Attendance</a>
+                    <a href="leave.html">Leave Requests</a>
+                    <a href="settings.html">Settings</a>
+                    <a href="#">Logout</a>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 content">
+                <h2 class="mb-4">Add New Employee</h2>
+
+                <form method="post" action="/employees/add">
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label">Full Name</label>
+                        <input type="text" name="fullName" class="form-control" id="fullName" placeholder="Enter full name" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-control" id="email" placeholder="Enter email" required />
+                    </div>
+
+                    <!-- Password field with eye icon -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" name="password" class="form-control" id="password" placeholder="Enter password" required />
+                            <span class="input-group-text" id="togglePassword"><i class="bi bi-eye"></i></span>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password field with eye icon -->
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <input type="password" name="confirmPassword" class="form-control" id="confirmPassword" placeholder="Confirm password" required />
+                            <span class="input-group-text" id="toggleConfirmPassword"><i class="bi bi-eye"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" name="phone" class="form-control" id="phone" placeholder="Enter phone number" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="dob" class="form-label">Date of Birth</label>
+                        <input type="date" name="dob" class="form-control" id="dob" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select name="gender" id="gender" class="form-select">
+                            <option value="" selected disabled>Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+
+                    <fieldset class="mb-3">
+                        <legend>Address</legend>
+                        <div class="mb-2">
+                            <label for="addressStreet" class="form-label">Street</label>
+                            <input type="text" name="addressStreet" class="form-control" id="addressStreet" placeholder="Enter street" />
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 mb-2">
+                                <label for="addressCity" class="form-label">City</label>
+                                <input type="text" name="addressCity" class="form-control" id="addressCity" placeholder="City" />
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="addressState" class="form-label">State</label>
+                                <input type="text" name="addressState" class="form-control" id="addressState" placeholder="State" />
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label for="addressZip" class="form-label">Zip Code</label>
+                                <input type="text" name="addressZip" class="form-control" id="addressZip" placeholder="Zip" />
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="mb-3">
+                        <label for="designation" class="form-label">Designation</label>
+                        <input type="text" name="designation" class="form-control" id="designation" placeholder="Enter job title" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="department" class="form-label">Department</label>
+                        <input type="text" name="department" class="form-control" id="department" placeholder="Enter department" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="salary" class="form-label">Salary ($)</label>
+                        <input type="number" name="salary" class="form-control" id="salary" placeholder="Enter salary" required min="0" step="0.01" />
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="startTime" class="form-label">Start Time</label>
+                            <input type="time" name="startTime" class="form-control" id="startTime" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="endTime" class="form-label">End Time</label>
+                            <input type="time" name="endTime" class="form-control" id="endTime" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="emergencyContact" class="form-label">Emergency Contact</label>
+                        <input type="tel" name="emergencyContact" class="form-control" id="emergencyContact" placeholder="Emergency phone number" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="employeeId" class="form-label">Employee ID (optional)</label>
+                        <input type="text" name="employeeId" class="form-control" id="employeeId" placeholder="Employee ID" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Add Employee</button>
+                </form>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', () => {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+
+            togglePassword.firstElementChild.classList.toggle('bi-eye');
+            togglePassword.firstElementChild.classList.toggle('bi-eye-slash');
+        });
+
+        const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
+        const confirmPassword = document.querySelector('#confirmPassword');
+
+        toggleConfirmPassword.addEventListener('click', () => {
+            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPassword.setAttribute('type', type);
+
+            toggleConfirmPassword.firstElementChild.classList.toggle('bi-eye');
+            toggleConfirmPassword.firstElementChild.classList.toggle('bi-eye-slash');
+        });
+    </script>
+</body>
+
+</html>
