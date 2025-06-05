@@ -1,0 +1,142 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+}
+
+.sidebar {
+  min-height: 100vh;
+  background-color: #343a40;
+}
+
+.sidebar a {
+  color: #fff;
+  padding: 12px 20px;
+  display: block;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  background-color: #495057;
+}
+
+.content {
+  padding: 20px;
+}
+
+.card {
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 15px;
+}
+
+.nav-link {
+  color: #fff !important;
+}
+
+.input-group-text {
+  cursor: pointer;
+}
+
+legend {/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+}
+
+.sidebar {
+  min-height: 100vh;
+  background-color: #343a40;
+}
+
+.sidebar a {
+  color: #fff;
+  padding: 12px 20px;
+  display: block;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  background-color: #495057;
+}
+
+.content {
+  padding: 20px;
+}
+
+.card {
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 15px;
+}
+
+.nav-link {
+  color: #fff !important;
+}
+
+.input-group-text {
+  cursor: pointer;
+}
+
+legend {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.form-section {
+  border-top: 1px solid #dee2e6;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+.text-primary {
+  color: #0d6efd !important;
+}
+
+.mt-4.text-end {
+  text-align: right;
+}
+
+/* Settings Page */
+.section-title {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+/* Additional Optional Reusable Styles */
+.btn-custom {
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+
+.table thead th {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.form-section {
+  border-top: 1px solid #dee2e6;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+.text-primary {
+  color: #0d6efd !important;
+}
+
+.mt-4.text-end {
+  text-align: right;
+}
