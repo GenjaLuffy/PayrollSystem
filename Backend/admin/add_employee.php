@@ -1,179 +1,197 @@
-<?php
-include './includes/header.php';
-?>
+<?php include './includes/header.php'; ?>
+<!DOCTYPE html>
+<html lang="en">
 
-        <!-- Main Content -->
-        <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4 content">
-          <div class="card p-4">
-            <h2 class="mb-4 text-primary">Add New Employee</h2>
-            <form id="addEmployeeForm" method="post" action="/employees/add">
-              <!-- Feedback Message -->
-              <div id="formMessage" class="mb-3"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Employee</title>
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+</head>
 
-              <!-- Basic Info -->
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <?php include './includes/sidebar.php'; ?>
+      <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4 content">
+        <div class="card p-4 mt-4">
+          <h2 class="mb-4 text-Dark">Add New Employee</h2>
+          <form id="addEmployeeForm" method="post" action="/employees/add">
+            <!-- Feedback Message -->
+            <div id="formMessage" class="mb-3"></div>
+
+            <!-- Basic Info -->
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="fullName" class="form-label">Full Name</label>
+                <input type="text" name="fullName" class="form-control" id="fullName" required />
+              </div>
+
+              <div class="col-md-6">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" id="username" required />
+              </div>
+
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-control" id="email" required />
+              </div>
+
+
+              <div class="col-md-6">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                  <input type="password" name="password" class="form-control" id="password" required />
+                  <span class="input-group-text" id="togglePassword"><i class="bi bi-eye"></i></span>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <div class="input-group">
+                  <input type="password" name="confirmPassword" class="form-control" id="confirmPassword" required />
+                  <span class="input-group-text" id="toggleConfirmPassword"><i class="bi bi-eye"></i></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="form-section mt-4">
+              <h5>Contact Details</h5>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label for="fullName" class="form-label">Full Name</label>
-                  <input type="text" name="fullName" class="form-control" id="fullName" required />
+                  <label for="phone" class="form-label">Phone Number</label>
+                  <input type="tel" name="phone" class="form-control" id="phone" />
                 </div>
 
                 <div class="col-md-6">
-                  <label for="email" class="form-label">Email Address</label>
-                  <input type="email" name="email" class="form-control" id="email" required />
+                  <label for="dob" class="form-label">Date of Birth</label>
+                  <input type="date" name="dob" class="form-control" id="dob" />
                 </div>
 
                 <div class="col-md-6">
-                  <label for="password" class="form-label">Password</label>
-                  <div class="input-group">
-                    <input type="password" name="password" class="form-control" id="password" required />
-                    <span class="input-group-text" id="togglePassword"><i class="bi bi-eye"></i></span>
-                  </div>
+                  <label for="gender" class="form-label">Gender</label>
+                  <select name="gender" id="gender" class="form-select">
+                    <option value="" selected disabled>Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
                 </div>
 
                 <div class="col-md-6">
-                  <label for="confirmPassword" class="form-label">Confirm Password</label>
-                  <div class="input-group">
-                    <input type="password" name="confirmPassword" class="form-control" id="confirmPassword" required />
-                    <span class="input-group-text" id="toggleConfirmPassword"><i class="bi bi-eye"></i></span>
-                  </div>
+                  <label for="emergencyContact" class="form-label">Emergency Contact</label>
+                  <input type="tel" name="emergencyContact" class="form-control" id="emergencyContact" />
                 </div>
               </div>
+            </div>
 
-              <!-- Contact Info -->
-              <div class="form-section">
-                <h5>Contact Details</h5>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label for="phone" class="form-label">Phone Number</label>
-                    <input type="tel" name="phone" class="form-control" id="phone" />
-                  </div>
-
-                  <div class="col-md-6">
-                    <label for="dob" class="form-label">Date of Birth</label>
-                    <input type="date" name="dob" class="form-control" id="dob" />
-                  </div>
-
-                  <div class="col-md-6">
-                    <label for="gender" class="form-label">Gender</label>
-                    <select name="gender" id="gender" class="form-select">
-                      <option value="" selected disabled>Select gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
-                  </div>
-
-                  <div class="col-md-6">
-                    <label for="emergencyContact" class="form-label">Emergency Contact</label>
-                    <input type="tel" name="emergencyContact" class="form-control" id="emergencyContact" />
-                  </div>
+            <!-- Address Info -->
+            <div class="form-section mt-4">
+              <h5>Address</h5>
+              <div class="mb-3">
+                <label for="addressStreet" class="form-label">Street</label>
+                <input type="text" name="addressStreet" class="form-control" id="addressStreet" />
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="addressCity" class="form-label">City</label>
+                  <input type="text" name="addressCity" class="form-control" id="addressCity" />
+                </div>
+                <div class="col-md-6">
+                  <label for="addressState" class="form-label">State</label>
+                  <input type="text" name="addressState" class="form-control" id="addressState" />
                 </div>
               </div>
+            </div>
 
-              <!-- Address Info -->
-              <div class="form-section">
-                <h5>Address</h5>
-                <div class="mb-3">
-                  <label for="addressStreet" class="form-label">Street</label>
-                  <input type="text" name="addressStreet" class="form-control" id="addressStreet" />
+            <!-- Job Info -->
+            <div class="form-section mt-4">
+              <h5>Job Details</h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="designation" class="form-label">Designation</label>
+                  <input type="text" name="designation" class="form-control" id="designation" required />
                 </div>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label for="addressCity" class="form-label">City</label>
-                    <input type="text" name="addressCity" class="form-control" id="addressCity" />
-                  </div>
-                  <div class="col-md-6">
-                    <label for="addressState" class="form-label">State</label>
-                    <input type="text" name="addressState" class="form-control" id="addressState" />
-                  </div>
+
+                <div class="col-md-6">
+                  <label for="department" class="form-label">Department</label>
+                  <input type="text" name="department" class="form-control" id="department" />
                 </div>
-              </div>
 
-              <!-- Job Info -->
-              <div class="form-section">
-                <h5>Job Details</h5>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label for="designation" class="form-label">Designation</label>
-                    <input type="text" name="designation" class="form-control" id="designation" required />
-                  </div>
+                <div class="col-md-6">
+                  <label for="salary" class="form-label">Salary ($)</label>
+                  <input type="number" name="salary" class="form-control" id="salary" required min="0" step="0.01" />
+                </div>
 
-                  <div class="col-md-6">
-                    <label for="department" class="form-label">Department</label>
-                    <input type="text" name="department" class="form-control" id="department" />
-                  </div>
-
-                  <div class="col-md-6">
-                    <label for="salary" class="form-label">Salary ($)</label>
-                    <input type="number" name="salary" class="form-control" id="salary" required min="0" step="0.01" />
-                  </div>
-
-                  <div class="col-md-6">
-                    <label for="employeeId" class="form-label">Employee ID (optional)</label>
-                    <input type="text" name="employeeId" class="form-control" id="employeeId" />
-                  </div>
+                <div class="col-md-6">
+                  <label for="employeeId" class="form-label">Employee ID (optional)</label>
+                  <input type="text" name="employeeId" class="form-control" id="employeeId" />
                 </div>
               </div>
+            </div>
 
-              <!-- Work Schedule -->
-              <div class="form-section">
-                <h5>Work Schedule</h5>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label for="startTime" class="form-label">Start Time</label>
-                    <input type="time" name="startTime" class="form-control" id="startTime" />
-                  </div>
-                  <div class="col-md-6">
-                    <label for="endTime" class="form-label">End Time</label>
-                    <input type="time" name="endTime" class="form-control" id="endTime" />
+            <!-- Work Schedule -->
+            <div class="form-section mt-4">
+              <h5>Work Schedule</h5>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label for="workType" class="form-label">Work Type</label>
+                  <select name="workType" id="workType" class="form-select" required>
+                    <option value="" selected disabled>Select work type</option>
+                    <option value="Full Time">Full Time</option>
+                    <option value="Part Time">Part Time</option>
+                  </select>
+                </div>
+                <div class="form-section mt-4">
+                  <h5>Work Schedule</h5>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="startTime" class="form-label">Start Time</label>
+                      <input type="time" name="startTime" class="form-control" id="startTime" />
+                    </div>
+                    <div class="col-md-6">
+                      <label for="endTime" class="form-label">End Time</label>
+                      <input type="time" name="endTime" class="form-control" id="endTime" />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Submit Button -->
-              <div class="mt-4 text-end">
-                <button type="submit" class="btn btn-primary px-4">Add Employee</button>
-              </div>
-            </form>
-          </div>
-        </main>
-      </div>
+                <!-- Submit Button -->
+                <div class="mt-4 text-end">
+                  <button type="submit" class="btn btn-primary px-4">Add Employee</button>
+                </div>
+          </form>
+        </div>
+      </main>
     </div>
+  </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Password Toggle -->
-    <script>
-      document.querySelector('#togglePassword').addEventListener('click', function () {
-        const password = document.querySelector('#password');
-        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-        password.setAttribute('type', type);
-        this.firstElementChild.classList.toggle('bi-eye');
-        this.firstElementChild.classList.toggle('bi-eye-slash');
-      });
+  <!-- Password Toggle -->
+  <script>
+    document.querySelector('#togglePassword').addEventListener('click', function() {
+      const password = document.querySelector('#password');
+      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+      password.setAttribute('type', type);
+      this.firstElementChild.classList.toggle('bi-eye');
+      this.firstElementChild.classList.toggle('bi-eye-slash');
+    });
 
-      document.querySelector('#toggleConfirmPassword').addEventListener('click', function () {
-        const confirmPassword = document.querySelector('#confirmPassword');
-        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-        confirmPassword.setAttribute('type', type);
-        this.firstElementChild.classList.toggle('bi-eye');
-        this.firstElementChild.classList.toggle('bi-eye-slash');
-      });
+    document.querySelector('#toggleConfirmPassword').addEventListener('click', function() {
+      const confirmPassword = document.querySelector('#confirmPassword');
+      const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+      confirmPassword.setAttribute('type', type);
+      this.firstElementChild.classList.toggle('bi-eye');
+      this.firstElementChild.classList.toggle('bi-eye-slash');
+    });
+  </script>
+</body>
 
-      // Form validation
-      document.getElementById('addEmployeeForm').addEventListener('submit', function (e) {
-        const pass = document.getElementById('password').value;
-        const confirm = document.getElementById('confirmPassword').value;
-        const message = document.getElementById('formMessage');
-
-        if (pass !== confirm) {
-          e.preventDefault();
-          message.innerHTML = `<div class="alert alert-danger" role="alert">Passwords do not match.</div>`;
-        }
-      });
-    </script>
-  </body>
-
-  </html>
+</html>

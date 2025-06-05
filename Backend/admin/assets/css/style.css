@@ -1,142 +1,141 @@
-/* General Styles */
+/* Body background */
 body {
-  font-family: Arial, sans-serif;
   background-color: #f8f9fa;
 }
 
+/* Card styles */
+.card, .edit-card, .attendance-card, .profile-card {
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease-in-out;
+}
+
+.edit-card {
+  max-width: 600px;
+  margin: 3rem auto;
+  background: #fff;
+  padding: 2rem;
+}
+
+.attendance-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.06);
+}
+
+/* Sidebar styles */
 .sidebar {
   min-height: 100vh;
   background-color: #343a40;
 }
 
 .sidebar a {
-  color: #fff;
-  padding: 12px 20px;
-  display: block;
+  color: white;
   text-decoration: none;
+  padding: 10px 16px;
+  display: block;
+  border-radius: 5px;
+  position: relative;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
+/* Sidebar hover animation */
 .sidebar a:hover {
   background-color: #495057;
+  transform: translateX(5px);
 }
 
-.content {
-  padding: 20px;
+/* Sidebar underline effect */
+.sidebar a::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  bottom: 8px;
+  width: 0%;
+  height: 2px;
+  background-color: #ffffff;
+  transition: width 0.3s ease;
 }
 
-.card {
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  border-radius: 15px;
+.sidebar a:hover::after {
+  width: 60%;
 }
 
-.nav-link {
-  color: #fff !important;
+/* Red Logout link */
+.sidebar a.text-danger {
+  color: #dc3545 !important;
 }
 
-.input-group-text {
-  cursor: pointer;
+.sidebar a.text-danger:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  transform: translateX(5px);
 }
 
-legend {/* General Styles */
-body {
-  font-family: Arial, sans-serif;
+/* Table styles */
+.table thead {
+  background-color: #e9f3fc;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
   background-color: #f8f9fa;
 }
 
-.sidebar {
-  min-height: 100vh;
-  background-color: #343a40;
+/* Badge font size */
+.badge {
+  font-size: 0.9rem;
 }
 
-.sidebar a {
-  color: #fff;
-  padding: 12px 20px;
-  display: block;
-  text-decoration: none;
+/* Profile Icon Styling */
+.profile-icon {
+  font-size: 4rem;
+  color: #000000;
 }
 
-.sidebar a:hover {
-  background-color: #495057;
-}
-
-.content {
-  padding: 20px;
-}
-
-.card {
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  border-radius: 15px;
-}
-
-.nav-link {
+/* Edit Button Custom Style */
+.btn-edit-profile {
+  background-color: #0d6efd !important;
   color: #fff !important;
-}
-
-.input-group-text {
-  cursor: pointer;
-}
-
-legend {
-  font-size: 1.1rem;
+  padding: 8px 24px;
+  border-radius: 25px;
   font-weight: 500;
-  color: #495057;
+  transition: all 0.3s ease-in-out;
+  border: none;
+  display: inline-block;
+  text-decoration: none;
 }
 
-.form-section {
-  border-top: 1px solid #dee2e6;
-  margin-top: 20px;
-  padding-top: 20px;
+.btn-edit-profile:hover {
+  background-color: #0b5ed7 !important;
+  color: #fff !important;
+  transform: scale(1.05);
+  text-decoration: none;
 }
 
-.text-primary {
-  color: #0d6efd !important;
-}
-
-.mt-4.text-end {
-  text-align: right;
-}
-
-/* Settings Page */
-.section-title {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid #dee2e6;
-  padding-bottom: 0.5rem;
+/* Save button style */
+.btn-save {
+  border-radius: 25px;
+  padding: 0.6rem 2.2rem;
   font-weight: 600;
-  font-size: 1.2rem;
+  transition: background-color 0.3s ease;
 }
 
-/* Additional Optional Reusable Styles */
-.btn-custom {
-  border-radius: 8px;
-  padding: 8px 16px;
+.btn-save:hover {
+  background-color: #0b5ed7;
+  color: white;
 }
 
-.table thead th {
-  background-color: #e9ecef;
-  color: #495057;
+/* Profile picture styling */
+input[type="file"] {
+  display: none;
 }
 
-.form-control:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #495057;
-}
-
-.form-section {
-  border-top: 1px solid #dee2e6;
-  margin-top: 20px;
-  padding-top: 20px;
-}
-
-.text-primary {
-  color: #0d6efd !important;
-}
-
-.mt-4.text-end {
-  text-align: right;
+.profile-pic {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #0d6efd;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
 }
