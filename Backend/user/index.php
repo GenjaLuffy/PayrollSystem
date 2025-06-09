@@ -1,20 +1,15 @@
+<?php include 'includes/sidebar.php'; ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payroll Management System</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <div class="sidebar">
-        <h2>Payroll System</h2>
-        <a href="index.html">Dashboard</a>
-        <a href="#">My Attendance</a>
-        <a href="leave.html">My Leave Details</a>
-        <a href="profile.html">My Profile</a>
-        <a href="#">Payslips</a>
-    </div>
+    
 
     <div class="main-content">
         <div class="header">
