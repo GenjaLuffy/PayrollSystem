@@ -7,5 +7,5 @@
   <a href="./payroll.php"><i class="bi bi-cash-stack"></i> <span class="link-text">Payroll</span></a>
   <a href="./profile.php"><i class="bi bi-person-circle"></i> <span class="link-text">Profile</span></a>
   <a href="./settings.php"><i class="bi bi-gear"></i> <span class="link-text">Settings</span></a>
-  <a href="./logout.php" class="text-danger"><i class="bi bi-box-arrow-right"></i> <span class="link-text">Logout</span></a>
+  <a href="../admin/logout.php" class="text-danger"><i class="bi bi-box-arrow-right"></i> <span class="link-text">Logout</span></a>
 </div>

@@ -1,4 +1,28 @@
-<?php include './includes/header.php'; ?>
+<?php
+include './includes/header.php';
+include './includes/connect.php';
+
+// Fetch admin info using session
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../index.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+$query = "SELECT * FROM admins WHERE id = ?";
+$stmt = $con->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$admin = $result->fetch_assoc();
+
+if (!$admin) {
+    echo "Admin not found.";
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -24,9 +48,12 @@
                         <div class="card profile-card shadow-sm">
                             <div class="card-body">
                                 <div class="text-center mb-4">
-                                    <img src="./assets/images/profile.png" alt="Profile Picture" class="profile-img rounded-circle" style="width:100px; height:100px; object-fit: cover;">
-                                    <h4 class="mt-2 fw-semibold">Johnathan Doe</h4>
-                                    <p class="text-muted mb-1">Administrator</p>
+                                    <img src="./assets/images/<?= htmlspecialchars($admin['profile_image'] ?? 'default.png') ?>" 
+                                         alt="Profile Picture" 
+                                         class="profile-img rounded-circle" 
+                                         style="width:100px; height:100px; object-fit: cover;">
+                                    <h4 class="mt-2 fw-semibold"><?= htmlspecialchars($admin['full_name']) ?></h4>
+                                    <p class="text-muted mb-1"><?= htmlspecialchars($admin['user_type']) ?></p>
                                     <span class="badge bg-success">Active</span>
                                 </div>
 
@@ -34,27 +61,27 @@
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold"><i class="bi bi-person-fill me-2"></i>Full Name:</label>
-                                    <p>Johnathan Doe</p>
+                                    <p><?= htmlspecialchars($admin['full_name']) ?></p>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold"><i class="bi bi-person-badge-fill me-2"></i>Username:</label>
-                                    <p>johndoe</p>
+                                    <p><?= htmlspecialchars($admin['username']) ?></p>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold"><i class="bi bi-envelope-fill me-2"></i>Email:</label>
-                                    <p>johndoe@example.com</p>
+                                    <p><?= htmlspecialchars($admin['email']) ?></p>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold"><i class="bi bi-telephone-fill me-2"></i>Phone:</label>
-                                    <p>+977-9800000000</p>
+                                    <p><?= htmlspecialchars($admin['phone']) ?></p>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold"><i class="bi bi-person-bounding-box me-2"></i>Role:</label>
-                                    <p>Admin</p>
+                                    <p><?= htmlspecialchars($admin['user_type']) ?></p>
                                 </div>
 
                                 <div class="text-center mt-4">

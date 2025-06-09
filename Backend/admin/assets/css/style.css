@@ -4,7 +4,10 @@ body {
 }
 
 /* Card styles */
-.card, .edit-card, .attendance-card, .profile-card {
+.card,
+.edit-card,
+.attendance-card,
+.profile-card {
   border-radius: 1rem;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease-in-out;
@@ -23,11 +26,17 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.06);
 }
 
+/*Navbar styles*/
+.navbar {
+  background-color: #343a40;
+}
+
 /* Sidebar styles */
 .sidebar {
   min-height: 100vh;
   background-color: #343a40;
 }
+
 
 .sidebar a {
   color: white;
@@ -76,7 +85,7 @@ body {
   background-color: #e9f3fc;
 }
 
-.table-striped > tbody > tr:nth-of-type(odd) {
+.table-striped>tbody>tr:nth-of-type(odd) {
   background-color: #f8f9fa;
 }
 

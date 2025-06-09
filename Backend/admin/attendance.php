@@ -21,9 +21,10 @@
         <div class="attendance-card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="text-Dark mb-0"><i class="bi bi-calendar-check me-2"></i>Attendance Records</h2>
-            <button class="btn btn-outline-primary">
+            <a href="add_attendance.php" class="btn btn-outline-primary">
               <i class="bi bi-plus-circle me-1"></i> Add Attendance
-            </button>
+            </a>
+
           </div>
 
           <div class="table-responsive">
