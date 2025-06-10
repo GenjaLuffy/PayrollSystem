@@ -1,10 +1,44 @@
-<?php include './includes/header.php'; ?>
+<?php
+include './includes/header.php';
+include './includes/connect.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Just insert posted data into attendance table (no validation)
+    $employee_id = $_POST['employee_id'];
+    $date = $_POST['date'];
+    $status = $_POST['status'];
+    $check_in_time = $_POST['start_time'] ?? null;
+    $check_out_time = $_POST['end_time'] ?? null;
+
+    $sql = "INSERT INTO attendance (employee_id, date, status, check_in_time, check_out_time)
+            VALUES (?, ?, ?, ?, ?)";
+
+    $stmt = $con->prepare($sql);
+    $stmt->bind_param("sssss", $employee_id, $date, $status, $check_in_time, $check_out_time);
+
+    if ($stmt->execute()) {
+        // Redirect or show success message
+        header("Location: attendance.php?msg=Attendance added successfully");
+        exit;
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    $stmt->close();
+}
+
+// Fetch employees for dropdown
+$sql = "SELECT employee_id, fullName FROM employees ORDER BY fullName";
+$result = $con->query($sql);
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Add Attendance</title>
   <link rel="stylesheet" href="./assets/css/style.css" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -25,7 +59,7 @@
             </a>
           </div>
 
-          <form method="POST" action="insert-attendance.php">
+          <form method="POST" action="">
             <div class="row g-3">
               <div class="col-md-6">
                 <label for="attendanceDate" class="form-label">Date</label>
@@ -34,11 +68,17 @@
 
               <div class="col-md-6">
                 <label for="employeeName" class="form-label">Employee</label>
-                <select name="employee" id="employeeName" class="form-select" required>
+                <select name="employee_id" id="employeeName" class="form-select" required>
                   <option selected disabled>Select employee</option>
-                  <option value="John Doe">John Doe</option>
-                  <option value="Jane Smith">Jane Smith</option>
-                  <option value="Emily Johnson">Emily Johnson</option>
+                  <?php
+                  if ($result && $result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                      echo '<option value="' . htmlspecialchars($row['employee_id']) . '">' . htmlspecialchars($row['fullName']) . '</option>';
+                    }
+                  } else {
+                    echo '<option disabled>No employees found</option>';
+                  }
+                  ?>
                 </select>
               </div>
 
@@ -50,6 +90,7 @@
                   <option value="Absent">Absent</option>
                   <option value="Late">Late</option>
                   <option value="Half Day">Half Day</option>
+                  <option value="Leave">Leave</option>
                 </select>
               </div>
 
@@ -75,8 +116,10 @@
     </div>
   </div>
 
- <script src="./assets/script/script.js"></script>
+  <script src="./assets/script/script.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
+
+<?php $con->close(); ?>

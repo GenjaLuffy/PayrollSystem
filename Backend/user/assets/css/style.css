@@ -1,43 +1,38 @@
-/* Reset & Base */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
   display: flex;
   min-height: 100vh;
   background-color: #f4f6f8;
 }
 
-/* Sidebar */
-.sidebar {
-  width: 220px;
-  background-color: #145cc9;
-  color: white;
-  padding: 20px 15px;
-}
+    .sidebar {
+      height: 100vh;
+      background-color: #0c1519;
+      color: white;
+      padding: 20px;
+    }
 
-.sidebar h2 {
-  margin-bottom: 30px;
-  font-size: 22px;
-  text-align: center;
-}
+    .sidebar a {
+      color: white;
+      display: block;
+      padding: 10px;
+      text-decoration: none;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
 
-.sidebar a {
-  display: block;
-  color: white;
-  padding: 12px;
-  text-decoration: none;
-  border-radius: 6px;
-  transition: 0.3s;
-}
+    .sidebar a:hover {
+      background-color: #34495e;
+    }
 
-.sidebar a:hover {
-  background-color: #34495e;
-}
+    .main-content {
+      padding: 30px;
+    }
 
+    .card:hover {
+      transform: translateY(-4px);
+      transition: 0.3s;
+    }
 /* Main Content */
 .main-content, .main {
   flex: 1;

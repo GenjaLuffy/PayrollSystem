@@ -1,4 +1,32 @@
-<?php include './includes/header.php'; ?>
+<?php 
+include './includes/header.php'; 
+include './includes/connect.php'; 
+
+// Query to get attendance records with employee names
+$sql = "SELECT a.date, e.fullName, a.check_in_time, a.check_out_time
+        FROM attendance a
+        JOIN employees e ON a.employee_id = e.employee_id
+        ORDER BY a.date DESC, e.fullName";
+
+$result = $con->query($sql);
+
+function getAttendanceStatus($checkIn, $checkOut) {
+    if (!$checkIn && !$checkOut) {
+        return ['Absent', 'bg-danger']; 
+    }
+    if ($checkIn && !$checkOut) {
+        return ['Late', 'bg-warning text-dark']; 
+    }
+    // Check if check-in time is after 10:15 AM means Late, etc.
+    $checkInTime = strtotime($checkIn);
+    $lateThreshold = strtotime('10:15:00');
+    if ($checkInTime > $lateThreshold) {
+        return ['Late', 'bg-warning text-dark'];
+    }
+    return ['Present', 'bg-success'];  
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,9 +37,7 @@
   <link rel="stylesheet" href="./assets/css/style.css" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
 </head>
-
 <body>
   <div class="container-fluid">
     <div class="row">
@@ -20,11 +46,10 @@
       <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4 mt-4">
         <div class="attendance-card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-Dark mb-0"><i class="bi bi-calendar-check me-2"></i>Attendance Records</h2>
+            <h2 class="text-dark mb-0"><i class="bi bi-calendar-check me-2"></i>Attendance Records</h2>
             <a href="add_attendance.php" class="btn btn-outline-primary">
               <i class="bi bi-plus-circle me-1"></i> Add Attendance
             </a>
-
           </div>
 
           <div class="table-responsive">
@@ -37,21 +62,19 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>2025-05-20</td>
-                  <td>Jane Smith</td>
-                  <td><span class="badge bg-success px-3 py-2">Present</span></td>
-                </tr>
-                <tr>
-                  <td>2025-05-21</td>
-                  <td>John Doe</td>
-                  <td><span class="badge bg-danger px-3 py-2">Absent</span></td>
-                </tr>
-                <tr>
-                  <td>2025-05-22</td>
-                  <td>Emily Johnson</td>
-                  <td><span class="badge bg-warning text-dark px-3 py-2">Late</span></td>
-                </tr>
+                <?php if ($result && $result->num_rows > 0): ?>
+                  <?php while($row = $result->fetch_assoc()): 
+                      list($statusText, $badgeClass) = getAttendanceStatus($row['check_in_time'], $row['check_out_time']);
+                  ?>
+                    <tr>
+                      <td><?= htmlspecialchars($row['date']) ?></td>
+                      <td><?= htmlspecialchars($row['fullName']) ?></td>
+                      <td><span class="badge <?= $badgeClass ?> px-3 py-2"><?= $statusText ?></span></td>
+                    </tr>
+                  <?php endwhile; ?>
+                <?php else: ?>
+                  <tr><td colspan="3" class="text-center">No attendance records found.</td></tr>
+                <?php endif; ?>
               </tbody>
             </table>
           </div>
@@ -64,3 +87,5 @@
 </body>
 
 </html>
+
+<?php $con->close(); ?>

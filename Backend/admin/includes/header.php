@@ -20,7 +20,6 @@ $profile_image = !empty($admin['profile_image']) ? $admin['profile_image'] : 'pr
     <div class="d-flex align-items-center">
       <span class="navbar-text me-2 text-white">Welcome, <?= htmlspecialchars($full_name) ?></span>
       <img src="assets/images/<?= htmlspecialchars($profile_image) ?>" alt="Admin Avatar" class="rounded-circle me-3" width="32" height="32" style="object-fit: cover;" />
-      <a class="btn btn-outline-light" href="../admin/logout.php">Logout</a>
     </div>
   </div>
 </nav>

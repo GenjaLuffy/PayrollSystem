@@ -12,8 +12,9 @@ $sql = "SELECT
             lr.reason, 
             lr.status 
         FROM leave_requests lr
-        JOIN users u ON lr.employee_id = u.employee_id
+        JOIN employees u ON lr.employee_id = u.employee_id
         ORDER BY lr.applied_on DESC";
+
 
 $result = $con->query($sql);
 ?>

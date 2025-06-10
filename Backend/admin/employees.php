@@ -1,4 +1,30 @@
-<?php include './includes/header.php'; ?>
+<?php 
+include './includes/header.php'; 
+include './includes/connect.php'; 
+
+$deleteMessage = '';
+if (isset($_GET['delete_id'])) {
+    $deleteId = $_GET['delete_id'];
+
+    // Prepare and execute delete query
+    $stmt = $con->prepare("DELETE FROM employees WHERE employee_id = ?");
+    $stmt->bind_param("s", $deleteId);
+
+    if ($stmt->execute()) {
+        $deleteMessage = "<div class='alert alert-success'>Employee deleted successfully.</div>";
+    } else {
+        $deleteMessage = "<div class='alert alert-danger'>Error deleting employee: " . htmlspecialchars($stmt->error) . "</div>";
+    }
+    $stmt->close();
+    header("Location: employees.php");
+    exit();
+}
+
+// Fetch employees from the database
+$sql = "SELECT * FROM employees";
+$result = $con->query($sql);
+?>
+
 <!DOCTYPE html>
 <html>
 
@@ -15,6 +41,9 @@
             <?php include './includes/sidebar.php'; ?>
             <div class="col-md-10 p-4">
                 <h2>Employees</h2>
+                
+                <?= $deleteMessage ?>
+
                 <a href="add_employee.php" class="btn btn-primary mb-3">Add New Employee</a>
                 <table class="table table-striped">
                     <thead>
@@ -27,17 +56,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>101</td>
-                            <td>John Doe</td>
-                            <td>HR</td>
-                            <td>Manager</td>
-                            <td>
-                                <button class="btn btn-sm btn-info">Edit</button>
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </td>
-                        </tr>
-                        <!-- More rows -->
+                        <?php if ($result && $result->num_rows > 0): ?>
+                            <?php while($row = $result->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($row['employee_id']) ?></td>
+                                    <td><?= htmlspecialchars($row['fullName']) ?></td>
+                                    <td><?= htmlspecialchars($row['department']) ?></td>
+                                    <td><?= htmlspecialchars($row['role']) ?></td>
+                                    <td>
+                                        <a href="employees.php?delete_id=<?= urlencode($row['employee_id']) ?>" 
+                                           class="btn btn-sm btn-danger" 
+                                           onclick="return confirm('Are you sure you want to delete this employee?')">Delete</a>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr><td colspan="5" class="text-center">No employees found.</td></tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -46,3 +81,5 @@
 </body>
 
 </html>
+
+<?php $con->close(); ?>

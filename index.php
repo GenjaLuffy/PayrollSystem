@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Check users table if not admin
-    $stmt = $con->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt = $con->prepare("SELECT * FROM employees WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $userResult = $stmt->get_result();
