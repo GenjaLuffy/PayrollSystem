@@ -23,11 +23,10 @@ VALUES
 (1, 'admin', 'Pawon Shrestha', 'admin@mail.com', '9808420035', '$2y$10$RjWfw7CR4iRphyt483zPseYL51SYew0JHzCTPnAY7X.LmaZ/zpJB6', 'default.png', 'Admin', '2025-06-09 09:05:00');
 -- Password = admin123
 
--- Employees Table (replaces users)
+-- Employees Table
 CREATE TABLE employees (
   id INT AUTO_INCREMENT PRIMARY KEY,
   employee_id VARCHAR(20) NOT NULL UNIQUE,
-  qr_code_data VARCHAR(255) NULL COMMENT 'Data to be encoded into the QR code (e.g., a URL to the employee profile)',
   username VARCHAR(50) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   fullName VARCHAR(100) NOT NULL,

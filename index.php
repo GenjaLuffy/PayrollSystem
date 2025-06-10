@@ -6,7 +6,6 @@ $db   = 'payroll_system';
 $user = 'root';
 $pass = '';
 
-// Connect to DB
 $con = new mysqli($host, $user, $pass, $db);
 if ($con->connect_error) {
     die("Connection failed: " . $con->connect_error);
@@ -46,13 +45,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role']; // e.g., employee
+            $_SESSION['role'] = $user['role']; 
             header("Location: Backend/user/dashboard.php");
             exit();
         }
     }
 
-    // If no match found
     $error = "Invalid username or password.";
 }
 ?>

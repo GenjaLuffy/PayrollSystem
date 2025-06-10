@@ -1,32 +1,73 @@
 <?php
 include './includes/header.php';
-include './includes/connect.php'; 
+include './includes/connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $employeeId = $_POST['employeeId'] ?: uniqid('EMP');
-    $username = $_POST['username'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $fullname = $_POST['fullName'];
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
-    $department = $_POST['department'];
-    $designation = $_POST['designation'];
-    $dateJoined = $_POST['joiningDate'];
+  $employeeId = $_POST['employeeId'] ?: 'EMP' . uniqid();
+  $username = $_POST['username'];
+  $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+  $fullname = $_POST['fullName'];
+  $email = $_POST['email'];
+  $phone = $_POST['phone'] ?: null;
+  $dob = $_POST['dob'] ?: null;
+  $gender = $_POST['gender'] ?: null;
+  $emergencyContact = $_POST['emergencyContact'] ?: null;
+  $addressStreet = $_POST['addressStreet'] ?? null;
+  $addressCity = $_POST['addressCity'] ?? null;
+  $designation = $_POST['designation'];
+  $department = $_POST['department'];
+  $salary = $_POST['salary'];
+  $joiningDate = $_POST['joiningDate'];
+  $bankName = $_POST['bankName'] ?: null;
+  $accountNumber = $_POST['accountNumber'] ?: null;
+  $pan = $_POST['pan'] ?: null;
+  $workType = $_POST['workType'] ?: null;
+  $startTime = $_POST['startTime'] ?: null;
+  $endTime = $_POST['endTime'] ?: null;
 
-    $stmt = $con->prepare("INSERT INTO employees (employee_id, username, password, fullName, email, phone, department, designation, joiningDate, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'employee')");
-    $stmt->bind_param("sssssssss", $employeeId, $username, $password, $fullname, $email, $phone, $department, $designation, $dateJoined);
 
-    if ($stmt->execute()) {
-        header("Location: employees.php");
-        exit();
-    } else {
-        echo "Error: " . $stmt->error;
-    }
+  $stmt = $con->prepare("INSERT INTO employees 
+    (employee_id, username, password, fullName, email, phone, dob, gender, emergencyContact, 
+    addressStreet, addressCity, designation, department, salary, joiningDate, bankName, accountNumber, pan, 
+    workType, startTime, endTime, role) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'employee')");
+  $stmt->bind_param(
+    "sssssssssssssdsssssss",
+    $employeeId,
+    $username,
+    $password,
+    $fullname,
+    $email,
+    $phone,
+    $dob,
+    $gender,
+    $emergencyContact,
+    $addressStreet,
+    $addressCity,
+    $designation,
+    $department,
+    $salary,
+    $joiningDate,
+    $bankName,
+    $accountNumber,
+    $pan,
+    $workType,
+    $startTime,
+    $endTime
+  );
 
-    $stmt->close();
-    $con->close();
+
+  if ($stmt->execute()) {
+    header("Location: employees.php?status=success");
+    exit();
+  } else {
+    error_log("SQL Error: " . $stmt->error);
+    echo "Error: Could not add employee. Please check the logs.";
+  }
+
+  $stmt->close();
+  $con->close();
 }
-
 ?>
 
 
@@ -116,12 +157,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <h5>Address</h5>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label for="addressCity" class="form-label">Street</label>
+                  <label for="addressCity" class="form-label">City</label>
                   <input type="text" name="addressCity" class="form-control" id="addressCity" />
                 </div>
                 <div class="col-md-6">
-                  <label for="addressState" class="form-label">City</label>
-                  <input type="text" name="addressState" class="form-control" id="addressState" />
+                  <label for="addressStreet" class="form-label">Street</label>
+                  <input type="text" name="addressStreet" class="form-control" id="addressStreet" />
                 </div>
               </div>
             </div>
