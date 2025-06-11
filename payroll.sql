@@ -20,7 +20,8 @@ CREATE TABLE `admins` (
 -- Default Admin Insert
 INSERT INTO `admins` (`id`, `username`, `full_name`, `email`, `phone`, `password`, `profile_image`, `user_type`, `created_at`)
 VALUES
-(1, 'admin', 'Pawon Shrestha', 'admin@mail.com', '9808420035', '$2y$10$RjWfw7CR4iRphyt483zPseYL51SYew0JHzCTPnAY7X.LmaZ/zpJB6', 'default.png', 'Admin', '2025-06-09 09:05:00');
+(1, 'admin', 'Pawon Shrestha', 'admin@mail.com', '9808420035', '$2y$10$RjWfw7CR4iRphyt483zPseYL51SYew0JHzCTPnAY7X.LmaZ/zpJB6', 'default.png', 'Admin', '2025-06-09 09:05:00'),
+(2, 'admin', 'Pujan Tandukar', 'admin@mail.com', '9808445785', '$2y$10$RjWfw7CR4iRphyt483zPseYL51SYew0JHzCTPnAY7X.LmaZ/zpJB6', 'default.png', 'Admin', '2025-06-09 09:05:00');
 -- Password = admin123
 
 -- Employees Table
