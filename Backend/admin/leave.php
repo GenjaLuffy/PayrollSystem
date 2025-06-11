@@ -5,7 +5,7 @@ include './includes/connect.php';
 // Fetch leave requests with employee username
 $sql = "SELECT 
             lr.id, 
-            u.username AS employee, 
+            u.fullName AS employee, 
             lr.leave_type,
             lr.start_date, 
             lr.end_date, 

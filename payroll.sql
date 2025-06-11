@@ -48,20 +48,22 @@ CREATE TABLE employees (
   startTime TIME,
   endTime TIME,
   role ENUM('admin','employee') DEFAULT 'employee',
+  profile_image VARCHAR(255) DEFAULT 'default.png',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+
 -- Attendance Table
 CREATE TABLE attendance (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  employee_id VARCHAR(20),
-  date DATE NOT NULL,
-  status ENUM('Present', 'Absent', 'Leave') NOT NULL,
-  check_in_time TIME DEFAULT NULL,
-  check_out_time TIME DEFAULT NULL,
-  UNIQUE KEY (employee_id, date),
-  FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(50),
+    date DATE,
+    check_in TIME DEFAULT NULL,
+    check_out TIME DEFAULT NULL,
+    status VARCHAR(20),
+    UNIQUE KEY unique_attendance (employee_id, date)
 );
+
 
 -- Leave Requests Table
 CREATE TABLE leave_requests (

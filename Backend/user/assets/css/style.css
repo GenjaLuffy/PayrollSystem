@@ -1,181 +1,164 @@
+/* Sidebar and layout styles */
 body {
-  display: flex;
   min-height: 100vh;
-  background-color: #f4f6f8;
-}
-
-    .sidebar {
-      height: 100vh;
-      background-color: #0c1519;
-      color: white;
-      padding: 20px;
-    }
-
-    .sidebar a {
-      color: white;
-      display: block;
-      padding: 10px;
-      text-decoration: none;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      transition: background 0.3s;
-    }
-
-    .sidebar a:hover {
-      background-color: #34495e;
-    }
-
-    .main-content {
-      padding: 30px;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      transition: 0.3s;
-    }
-/* Main Content */
-.main-content, .main {
-  flex: 1;
-  padding: 20px;
-  overflow: auto;
-}
-
-/* Header */
-.header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
+  font-family: Arial, sans-serif;
+}
+
+.sidebar {
+  width: 220px;
+  background: #343a40;
+  color: #fff;
+  min-height: 100vh;
+}
+
+.sidebar a {
+  color: #adb5bd;
+  text-decoration: none;
+  display: block;
+  padding: 1rem 1.5rem;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background: #495057;
+  color: #fff;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 2rem;
+  background: #f8f9fa;
+}
+
+.main {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
 }
 
 .header h1 {
-  font-size: 26px;
-  color: #2c3e50;
-}
-
-.user-info {
-  font-size: 16px;
-  color: #555;
-}
-
-/* Cards */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.card {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-  transition: 0.3s;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-}
-
-.card h3 {
-  font-size: 20px;
-  margin-bottom: 10px;
-  color: #333;
-}
-
-.card p {
-  font-size: 16px;
-  color: #777;
-}
-
-/* Media Queries */
-@media (max-width: 768px) {
-  .sidebar {
-    display: none;
-  }
-}
-
-/* Leave Page */
-.leave-table table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.leave-table th, .leave-table td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.leave-table th {
-  background-color: #f9fafb;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
 .filters {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  justify-content: center;
 }
 
 .filters select {
-  padding: 8px 12px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  background-color: #f7f7f7;
 }
 
 .badge {
   display: inline-block;
-  padding: 4px 8px;
-  background-color: #4CAF50;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
   color: white;
   border-radius: 4px;
-  font-size: 14px;
 }
 
-/* Profile Page */
-.profile-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.badge.approved {
+  background-color: #28a745;
 }
 
-.profile-box {
-  display: flex;
-  gap: 30px;
-  margin-top: 30px;
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
-  width: 100%;
+.badge.declined {
+  background-color: #dc3545;
 }
 
-.profile-photo {
-  text-align: center;
+.badge.pending {
+  background-color: #ffc107;
 }
 
-.profile-photo img {
-  width: 120px;
-  height: 120px;
+.actions button {
+  margin-right: 0.5rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 3px;
+  color: white;
+}
+
+.actions .edit {
+  background-color: #007bff;
+}
+
+.actions .remove {
+  background-color: #dc3545;
+}
+
+/* Profile image - large size (use for profile page) */
+.profile-img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
   border-radius: 50%;
-  border: 4px solid #000;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.profile-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px 30px;
-  flex: 1;
+/* Smaller profile image */
+.profile-img-small {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  position: relative;
+  cursor: pointer;
+  transition: filter 0.3s ease;
 }
 
-.profile-details div {
-  font-size: 17px;
+.image-container {
+  position: relative;
+  display: inline-block;
 }
 
-.profile-details label {
-  font-weight: bold;
-  color: #555;
+.image-container:hover .edit-overlay {
+  opacity: 1;
 }
+
+.edit-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+/* Adding a class for better targeting and pending status */
+    .badge.status-approved { background-color: #28a745; }
+    .badge.status-pending { background-color: #ffc107; color: #000; }
+    .badge.status-rejected { background-color: #dc3545; }
+    .filters .form-select { max-width: 250px; }
