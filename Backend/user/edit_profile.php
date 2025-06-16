@@ -25,6 +25,10 @@ if ($result->num_rows == 0) {
 $employee = $result->fetch_assoc();
 $profile_image = $employee['profile_image'];
 
+// Initialize message variables
+$success_message = "";
+$error_message = "";
+
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fullName = $_POST['fullName'];
@@ -38,14 +42,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty($_FILES['profile_image']['name']) && $_FILES['profile_image']['error'] === 0) {
         $imageName = basename($_FILES['profile_image']['name']);
 
-        // Use the existing upload directory (make sure this path is correct)
+        // Use the existing upload directory
         $uploadDir = __DIR__ . '/assets/images';
         $targetPath = $uploadDir . '/' . $imageName;
 
         if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $targetPath)) {
             $profile_image = $imageName;
         } else {
-            echo "<div class='alert alert-danger'>Failed to move uploaded file.</div>";
+            $error_message = "Failed to move uploaded file.";
         }
     }
 
@@ -55,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("ssssssss", $fullName, $dob, $phone, $gender, $addressStreet, $addressCity, $profile_image, $employee_id);
 
     if ($stmt->execute()) {
-        echo "<div class='alert alert-success'>Update Successfully!</div>";
+        $success_message = "Update Successfully!";
         $employee['fullName'] = $fullName;
         $employee['dob'] = $dob;
         $employee['phone'] = $phone;
@@ -64,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $employee['addressCity'] = $addressCity;
         $employee['profile_image'] = $profile_image;
     } else {
-        echo "<div class='alert alert-danger'>Update failed!</div>";
+        $error_message = "Update failed!";
     }
 }
 ?>
@@ -84,6 +88,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <?php include 'includes/sidebar.php'; ?>
     <div class="content container my-5">
         <h2 class="mb-4">Edit Profile</h2>
+
+        <!-- Success and Error Alerts -->
+        <?php if (!empty($success_message)): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <?= htmlspecialchars($success_message) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($error_message)): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?= htmlspecialchars($error_message) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
         <form method="POST" enctype="multipart/form-data" class="card shadow-sm p-4">
             <div class="mb-3 text-center">
                 <div class="image-container">
@@ -100,6 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 <input type="file" name="profile_image" id="profileImageInput" class="form-control" style="display:none;" accept="image/*">
             </div>
+
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Full Name</label>

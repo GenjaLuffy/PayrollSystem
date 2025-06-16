@@ -3,7 +3,15 @@ include './includes/header.php';
 include './includes/connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $employeeId = $_POST['employeeId'] ?: 'EMP' . uniqid();
+  $result = $con->query("SELECT employee_id FROM employees ORDER BY id DESC LIMIT 1");
+  if ($result && $row = $result->fetch_assoc()) {
+    $lastId = intval(substr($row['employee_id'], 3));
+    $newId = $lastId + 1;
+  } else {
+    $newId = 1;
+  }
+  $employeeId = 'EMP' . str_pad($newId, 4, '0', STR_PAD_LEFT);
+
   $username = $_POST['username'];
   $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
   $fullname = $_POST['fullName'];
@@ -25,12 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $startTime = $_POST['startTime'] ?: null;
   $endTime = $_POST['endTime'] ?: null;
 
-
+  // Insert into database
   $stmt = $con->prepare("INSERT INTO employees 
     (employee_id, username, password, fullName, email, phone, dob, gender, emergencyContact, 
     addressStreet, addressCity, designation, department, salary, joiningDate, bankName, accountNumber, pan, 
     workType, startTime, endTime, role) 
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'employee')");
+
   $stmt->bind_param(
     "sssssssssssssdsssssss",
     $employeeId,
@@ -56,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $endTime
   );
 
-
   if ($stmt->execute()) {
     header("Location: employees.php?status=success");
     exit();
@@ -69,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $con->close();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -90,8 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4 content">
         <div class="card p-4 mt-4">
           <h2 class="mb-4 text-dark">Add New Employee</h2>
-          <form id="addEmployeeForm" method="post" action="">
-            <div id="formMessage" class="mb-3"></div>
+          <form id="addEmployeeForm" method="post" action="" onsubmit="return validateForm()">
+            <div id="formMessage" class="mb-3 text-danger"></div>
 
             <!-- Basic Info -->
             <div class="row g-3">
@@ -157,13 +164,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <h5>Address</h5>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label for="addressCity" class="form-label">City</label>
-                  <input type="text" name="addressCity" class="form-control" id="addressCity" />
-                </div>
-                <div class="col-md-6">
                   <label for="addressStreet" class="form-label">Street</label>
                   <input type="text" name="addressStreet" class="form-control" id="addressStreet" />
                 </div>
+
+                <div class="col-md-6">
+                  <label for="addressCity" class="form-label">City</label>
+                  <input type="text" name="addressCity" class="form-control" id="addressCity" />
+                </div>
+
               </div>
             </div>
 
@@ -186,10 +195,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="col-md-6">
                   <label for="joiningDate" class="form-label">Date of Joining</label>
                   <input type="date" name="joiningDate" class="form-control" id="joiningDate" required />
-                </div>
-                <div class="col-md-6">
-                  <label for="employeeId" class="form-label">Employee ID (optional)</label>
-                  <input type="text" name="employeeId" class="form-control" id="employeeId" />
                 </div>
               </div>
             </div>
@@ -248,7 +253,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="./assets/script/script.js"></script>
+  <script>
+    function validateForm() {
+      const name = document.getElementById("fullName").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const errorBox = document.getElementById("formMessage");
+      errorBox.textContent = "";
+
+      const nameValid = /^[A-Za-z\s]+$/.test(name);
+      const phoneValid = /^(98|97|96)\d{8}$/.test(phone);
+
+      if (!nameValid) {
+        errorBox.textContent = "Full name must contain only letters and spaces.";
+        return false;
+      }
+
+      if (phone && !phoneValid) {
+        errorBox.textContent = "Please enter a valid Nepali phone number.";
+        return false;
+      }
+
+      const pass = document.getElementById("password").value;
+      const confirmPass = document.getElementById("confirmPassword").value;
+      if (pass !== confirmPass) {
+        errorBox.textContent = "Passwords do not match.";
+        return false;
+      }
+
+      return true;
+    }
+  </script>
 </body>
 
 </html>

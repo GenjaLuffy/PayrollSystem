@@ -60,7 +60,7 @@ CREATE TABLE attendance (
     employee_id VARCHAR(50),
     date DATE,
     check_in TIME DEFAULT NULL,
-    check_out TIME DEFAULT NULL,
+    check_out  TIME DEFAULT NULL,
     status VARCHAR(20),
     UNIQUE KEY unique_attendance (employee_id, date)
 );
@@ -93,4 +93,15 @@ CREATE TABLE payslips (
   status ENUM('Paid', 'Unpaid') DEFAULT 'Unpaid',
   UNIQUE KEY (employee_id, month),
   FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE
+);
+
+-- Salary Table
+CREATE TABLE salaries (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  employee_id INT NOT NULL,
+  month INT NOT NULL,
+  year INT NOT NULL,
+  basic_salary DECIMAL(10,2) NOT NULL,
+  paid BOOLEAN DEFAULT 0,
+  payment_date DATE DEFAULT NULL
 );

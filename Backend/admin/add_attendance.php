@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $check_in_time = $_POST['start_time'] ?? null;
     $check_out_time = $_POST['end_time'] ?? null;
 
-    $sql = "INSERT INTO attendance (employee_id, date, status, check_in_time, check_out_time)
+    $sql = "INSERT INTO attendance (employee_id, date, status, check_in, check_out)
             VALUES (?, ?, ?, ?, ?)";
 
     $stmt = $con->prepare($sql);

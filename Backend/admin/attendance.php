@@ -2,28 +2,37 @@
 include './includes/header.php'; 
 include './includes/connect.php'; 
 
-// Query to get attendance records with employee names
-$sql = "SELECT a.date, e.fullName, a.check_in_time, a.check_out_time
+$today = date('Y-m-d');
+
+// Get today's attendance with employee start time
+$sqlToday = "SELECT a.date, e.fullName, a.check_in, a.check_out, e.startTime
+             FROM attendance a
+             JOIN employees e ON a.employee_id = e.employee_id
+             WHERE a.date = '$today'
+             ORDER BY e.fullName";
+
+$resultToday = $con->query($sqlToday);
+
+// Get all attendance records with employee start time
+$sql = "SELECT a.date, e.fullName, a.check_in, a.check_out, e.startTime
         FROM attendance a
         JOIN employees e ON a.employee_id = e.employee_id
         ORDER BY a.date DESC, e.fullName";
 
 $result = $con->query($sql);
 
-function getAttendanceStatus($checkIn, $checkOut) {
-    if (!$checkIn && !$checkOut) {
-        return ['Absent', 'bg-danger']; 
-    }
-    if ($checkIn && !$checkOut) {
-        return ['Late', 'bg-warning text-dark']; 
-    }
-    // Check if check-in time is after 10:15 AM means Late, etc.
+// Function to get status based on check-in and check-out
+function getAttendanceStatus($checkIn, $checkOut, $dutyStartTime) {
+    if (!$checkIn && !$checkOut) return ['Absent', 'bg-danger'];
+    if ($checkIn && !$checkOut) return ['Late', 'bg-warning text-dark'];
+
     $checkInTime = strtotime($checkIn);
-    $lateThreshold = strtotime('10:15:00');
-    if ($checkInTime > $lateThreshold) {
+    $graceTime = strtotime('+15 minutes', strtotime($dutyStartTime));
+
+    if ($checkInTime > $graceTime) {
         return ['Late', 'bg-warning text-dark'];
     }
-    return ['Present', 'bg-success'];  
+    return ['Present', 'bg-success'];
 }
 ?>
 
@@ -38,6 +47,7 @@ function getAttendanceStatus($checkIn, $checkOut) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 </head>
+
 <body>
   <div class="container-fluid">
     <div class="row">
@@ -52,6 +62,35 @@ function getAttendanceStatus($checkIn, $checkOut) {
             </a>
           </div>
 
+          <!-- Today's Attendance -->
+          <h4 class="text-dark mt-4 mb-3"><i class="bi bi-clock-history me-2"></i>Today's Attendance (<?= $today ?>)</h4>
+          <div class="table-responsive mb-4">
+            <table class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if ($resultToday && $resultToday->num_rows > 0): ?>
+                  <?php while($row = $resultToday->fetch_assoc()): 
+                        list($statusText, $badgeClass) = getAttendanceStatus($row['check_in'], $row['check_out'], $row['startTime']);
+                  ?>
+                    <tr>
+                      <td><?= htmlspecialchars($row['fullName']) ?></td>
+                      <td><span class="badge <?= $badgeClass ?> px-3 py-2"><?= $statusText ?></span></td>
+                    </tr>
+                  <?php endwhile; ?>
+                <?php else: ?>
+                  <tr><td colspan="2" class="text-center">No attendance records for today.</td></tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- All Attendance Records -->
+          <h4 class="text-dark mt-4 mb-3"><i class="bi bi-journal-text me-2"></i>All Records</h4>
           <div class="table-responsive">
             <table class="table table-striped table-hover align-middle">
               <thead>
@@ -64,7 +103,7 @@ function getAttendanceStatus($checkIn, $checkOut) {
               <tbody>
                 <?php if ($result && $result->num_rows > 0): ?>
                   <?php while($row = $result->fetch_assoc()): 
-                      list($statusText, $badgeClass) = getAttendanceStatus($row['check_in_time'], $row['check_out_time']);
+                        list($statusText, $badgeClass) = getAttendanceStatus($row['check_in'], $row['check_out'], $row['startTime']);
                   ?>
                     <tr>
                       <td><?= htmlspecialchars($row['date']) ?></td>
@@ -85,7 +124,6 @@ function getAttendanceStatus($checkIn, $checkOut) {
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
 
 <?php $con->close(); ?>

@@ -22,7 +22,6 @@ $stmt_today->close();
 // Handle Check-In / Check-Out
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['check_in']) && !$todays_attendance) {
-        // Simplified INSERT without nepali_date
         $insert = $con->prepare("INSERT INTO attendance (employee_id, date, check_in, status) VALUES (?, ?, ?, 'Present')");
         $insert->bind_param("sss", $employee_id, $today, $current_time);
         $insert->execute();
