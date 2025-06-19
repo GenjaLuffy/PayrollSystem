@@ -86,19 +86,6 @@ $net_salary = $basic_pay + $allowances - $deductions;
       </div>
     </div>
 
-    <!-- Salary Card -->
-    <div class="col-md-6 col-lg-3">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="card-title">Salary Details</h5>
-          <p><strong>Basic Pay:</strong> $<?= number_format($basic_pay, 2) ?></p>
-          <p><strong>Allowances:</strong> $<?= number_format($allowances, 2) ?></p>
-          <p><strong>Deductions:</strong> $<?= number_format($deductions, 2) ?></p>
-          <p><strong>Net Salary:</strong> $<?= number_format($net_salary, 2) ?></p>
-          <a href="#" class="btn btn-primary btn-sm mt-2">View Payslips</a>
-        </div>
-      </div>
-    </div>
 
     <!-- Attendance Card -->
     <div class="col-md-6 col-lg-3">
@@ -113,26 +100,37 @@ $net_salary = $basic_pay + $allowances - $deductions;
       </div>
     </div>
 
-    <!-- Recent Payslips Card -->
-    <div class="col-md-6 col-lg-3">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="card-title">Recent Payslips</h5>
-          <ul class="list-group list-group-flush mb-3">
-            <?php
-            if ($payslips) {
-              foreach ($payslips as $payslip) {
-                echo '<li class="list-group-item">' . htmlspecialchars($payslip['month']) . ' - $' . number_format($payslip['net_salary'], 2) . '</li>';
-              }
-            } else {
-              echo '<li class="list-group-item">No payslips found.</li>';
+   <!-- Recent Payslips Card -->
+<div class="col-md-6 col-lg-3">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">Recent Payslips</h5>
+      <ul class="list-group list-group-flush mb-3">
+        <?php
+        $hasValidPayslip = false;
+
+        if ($payslips) {
+          foreach ($payslips as $payslip) {
+            $month = htmlspecialchars($payslip['month']);
+            $net_salary = $payslip['net_salary'] ?? 0;
+
+            // Only show payslips with a positive salary
+            if ($net_salary > 0) {
+              echo '<li class="list-group-item payslip-item" data-month="' . $month . '">' . $month . ' - $' . number_format($net_salary, 2) . '</li>';
+              $hasValidPayslip = true;
             }
-            ?>
-          </ul>
-          <a href="#" class="btn btn-primary btn-sm">View All</a>
-        </div>
-      </div>
+          }
+        }
+
+        if (!$hasValidPayslip) {
+          echo '<li class="list-group-item">No valid payslips found.</li>';
+        }
+        ?>
+      </ul>
+      <a href="#" class="btn btn-primary btn-sm">View All</a>
     </div>
+  </div>
+</div>
 
   </div>
 </div>
