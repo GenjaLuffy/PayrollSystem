@@ -9,6 +9,7 @@ define('PF_EMPLOYEE_RATE', 0.05); // 5% employee contribution
 define('PF_EMPLOYER_RATE', 0.05); // 5% employer contribution
 define('ANNUAL_LEAVE_DAYS', 15); // 15 days paid leave per year
 define('WORKING_DAYS_PER_MONTH', 26); // Average working days per month
+define('FESTIVAL_BONUS_RATE', 1/12); // 1/12th of basic salary as monthly festival bonus
 
 // Tax slabs for single individual (2025, NPR)
 $taxSlabs = [
@@ -26,6 +27,7 @@ class PayrollCalculator {
     private $year;
     private $basicSalary;
     private $allowances;
+    private $festivalBonus;
     private $leaveDaysTaken;
     private $presentDays;
     private $absentDays;
@@ -50,6 +52,7 @@ class PayrollCalculator {
             $totalSalary = max($row['salary'], MINIMUM_WAGE);
             $this->basicSalary = $totalSalary * 0.7; // 70% as basic salary
             $this->allowances = $totalSalary * 0.3; // 30% as allowances
+            $this->festivalBonus = $this->basicSalary * FESTIVAL_BONUS_RATE; // Monthly festival bonus
         } else {
             throw new Exception("Employee not found");
         }
@@ -85,7 +88,7 @@ class PayrollCalculator {
         $sql = "SELECT SUM(overtime_hours) as overtime_hours
                 FROM attendance
                 WHERE employee_id = ? AND MONTH(date) = ? AND YEAR(date) = ?
-                AND status = 'Overtime'";
+                AND status IN ('Present', 'Overtime')";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("sii", $this->employeeId, $this->month, $this->year);
         $stmt->execute();
@@ -93,7 +96,7 @@ class PayrollCalculator {
         $this->overtimeHours = $result->fetch_assoc()['overtime_hours'] ?? 0;
         $stmt->close();
 
-        // Absent days (adjusted for actual working days)
+        // Absent days
         $totalPossibleDays = cal_days_in_month(CAL_GREGORIAN, $this->month, $this->year);
         $weekends = floor($totalPossibleDays / 7) * 2 + ($totalPossibleDays % 7 > 5 ? 2 : ($totalPossibleDays % 7 > 0 ? 1 : 0));
         $workingDays = $totalPossibleDays - $weekends;
@@ -113,7 +116,7 @@ class PayrollCalculator {
     public function calculateGrossSalary() {
         $leavePay = $this->calculateLeavePay();
         $overtimePay = $this->calculateOvertimePay();
-        return $this->basicSalary + $this->allowances + $leavePay + $overtimePay;
+        return $this->basicSalary + $this->allowances + $this->festivalBonus + $leavePay + $overtimePay;
     }
 
     public function calculateSSF() {
@@ -162,16 +165,24 @@ class PayrollCalculator {
         $monthYear = sprintf("%d-%02d", $this->year, $this->month);
         $ssf = $this->calculateSSF();
         $pf = $this->calculatePF();
+        $tax = $this->calculateTax();
+        $overtimePay = $this->calculateOvertimePay();
 
-        $sql = "INSERT INTO payslips (employee_id, month, total_present_days, total_leave_days, total_absent_days, gross_salary, net_salary, ssf_employee, ssf_employer, pf_employee, pf_employer, tax_deduction, overtime_pay, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Unpaid')";
+        // Insert into payslips with status 'Paid'
+        $sql = "INSERT INTO payslips (employee_id, month, total_present_days, total_leave_days, total_absent_days, 
+                gross_salary, net_salary, ssf_employee, ssf_employer, pf_employee, pf_employer, tax_deduction, 
+                festival_bonus, overtime_pay, overtime_hours, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Paid')";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ssiiidddddddd", $this->employeeId, $monthYear, $this->presentDays, $this->leaveDaysTaken, $this->absentDays, $grossSalary, $netSalary, $ssf['employee'], $ssf['employer'], $pf['employee'], $pf['employer'], $this->calculateTax(), $this->calculateOvertimePay());
+        $stmt->bind_param("ssiiiddddddddds", $this->employeeId, $monthYear, $this->presentDays, $this->leaveDaysTaken, 
+                          $this->absentDays, $grossSalary, $netSalary, $ssf['employee'], $ssf['employer'], 
+                          $pf['employee'], $pf['employer'], $tax, $this->festivalBonus, $overtimePay, $this->overtimeHours);
         $stmt->execute();
         $stmt->close();
 
-        $sql = "INSERT INTO salaries (employee_id, month, year, basic_salary, paid)
-                VALUES ((SELECT id FROM employees WHERE employee_id = ?), ?, ?, ?, 0)";
+        // Insert into salaries with paid_status 'Paid'
+        $sql = "INSERT INTO salaries (employee_id, month, year, basic_salary, paid_status)
+                VALUES (?, ?, ?, ?, 'Paid')";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("siid", $this->employeeId, $this->month, $this->year, $this->basicSalary);
         $stmt->execute();
@@ -188,6 +199,7 @@ class PayrollCalculator {
             'month' => sprintf("%d-%02d", $this->year, $this->month),
             'basic_salary' => $this->basicSalary,
             'allowances' => $this->allowances,
+            'festival_bonus' => $this->festivalBonus,
             'leave_pay' => $this->calculateLeavePay(),
             'overtime_pay' => $this->calculateOvertimePay(),
             'gross_salary' => $this->calculateGrossSalary(),
@@ -200,7 +212,8 @@ class PayrollCalculator {
             'present_days' => $this->presentDays,
             'leave_days' => $this->leaveDaysTaken,
             'absent_days' => $this->absentDays,
-            'overtime_hours' => $this->overtimeHours
+            'overtime_hours' => $this->overtimeHours,
+            'status' => 'Paid'
         ];
     }
 }

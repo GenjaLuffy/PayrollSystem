@@ -101,6 +101,7 @@ CREATE TABLE payslips (
   tax_deduction DECIMAL(10,2),
   festival_bonus DECIMAL(10,2),
   overtime_pay DECIMAL(10,2),
+  overtime_hours DECIMAL(10,2) DEFAULT 0,
   status ENUM('Paid', 'Unpaid') DEFAULT 'Unpaid',
   UNIQUE KEY (employee_id, month),
   FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE
@@ -108,15 +109,15 @@ CREATE TABLE payslips (
 
 -- Salaries Table
 CREATE TABLE salaries (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  employee_id INT NOT NULL,
-  month INT NOT NULL,
-  year INT NOT NULL,
-  basic_salary DECIMAL(10,2) NOT NULL,
-  paid BOOLEAN DEFAULT 0,
-  payment_date DATE DEFAULT NULL,
-  FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(20),
+    month INT,
+    year INT,
+    basic_salary DECIMAL(10, 2),
+    paid_status VARCHAR(20) DEFAULT 'Unpaid',
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 -- Audit Logs Table
 CREATE TABLE audit_logs (

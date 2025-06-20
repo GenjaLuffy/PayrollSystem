@@ -2,100 +2,48 @@
 session_start();
 include './includes/connect.php';
 
-// Check if user is logged in
+// Redirect if not logged in
 if (!isset($_SESSION['employee_id']) && !isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-$employee_id = $_SESSION['employee_id'] ?? $_SESSION['user_id']; // Fallback to user_id
-$currentMonth = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('m'); // Default to June 2025
-$currentYear = (int)date('Y'); // 2025
+$employee_id = $_SESSION['employee_id'] ?? $_SESSION['user_id'];
+$currentMonth = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('m');
+$currentYear = (int)date('Y');
+$monthYear = sprintf("%d-%02d", $currentYear, $currentMonth);
 
-// Fetch basic salary and full name from employees table
-$sql_emp = "SELECT salary, fullName FROM employees WHERE employee_id = ?";
+// Fetch employee name
+$sql_emp = "SELECT fullName FROM employees WHERE employee_id = ?";
 $stmt_emp = $con->prepare($sql_emp);
 $stmt_emp->bind_param("s", $employee_id);
 $stmt_emp->execute();
-$res_emp = $stmt_emp->get_result();
-$emp = $res_emp->fetch_assoc();
+$emp_result = $stmt_emp->get_result();
+$employee = $emp_result->fetch_assoc();
+$stmt_emp->close();
 
-if (!$emp) {
+if (!$employee) {
     $_SESSION['error'] = "Employee not found.";
     header("Location: login.php");
     exit;
 }
+$fullName = $employee['fullName'];
 
-$fullName = $emp['fullName'];
-$basic_salary = (float)$emp['salary']; // Use salary as basic_salary directly
+// Fetch payslip
+$sql_payslip = "SELECT total_present_days, total_leave_days, total_absent_days, gross_salary, net_salary,
+                ssf_employee, ssf_employer, pf_employee, pf_employer, tax_deduction, festival_bonus,
+                overtime_pay, overtime_hours, status
+                FROM payslips
+                WHERE employee_id = ? AND month = ?";
+$stmt_payslip = $con->prepare($sql_payslip);
+$stmt_payslip->bind_param("ss", $employee_id, $monthYear);
+$stmt_payslip->execute();
+$payslip_result = $stmt_payslip->get_result();
+$payslip_data = $payslip_result->fetch_assoc();
+$stmt_payslip->close();
 
-// Calculate working days and attendance data for the month
-$daysInMonth = cal_days_in_month(CAL_GREGORIAN, $currentMonth, $currentYear);
-$weekends = floor($daysInMonth / 7) * 2 + ($daysInMonth % 7 > 5 ? 2 : ($daysInMonth % 7 > 0 ? 1 : 0));
-$totalWorkingDays = $daysInMonth - $weekends;
-
-// Fetch attendance data
-$sql_att = "SELECT COUNT(*) as present_days, SUM(overtime_hours) as total_overtime_hours 
-            FROM attendance 
-            WHERE employee_id = ? AND MONTH(date) = ? AND YEAR(date) = ? AND status = 'Present'";
-$stmt_att = $con->prepare($sql_att);
-$stmt_att->bind_param("sii", $employee_id, $currentMonth, $currentYear);
-$stmt_att->execute();
-$att_result = $stmt_att->get_result();
-$att_data = $att_result->fetch_assoc();
-$present_days = (int)$att_data['present_days'];
-$total_overtime_hours = (float)($att_data['total_overtime_hours'] ?? 0);
-
-// Fetch approved leave days
-$sql_leave = "SELECT SUM(DATEDIFF(end_date, start_date) + 1) as leave_days 
-              FROM leave_requests 
-              WHERE employee_id = ? AND status = 'Approved' 
-              AND MONTH(start_date) = ? AND YEAR(start_date) = ?";
-$stmt_leave = $con->prepare($sql_leave);
-$stmt_leave->bind_param("sii", $employee_id, $currentMonth, $currentYear);
-$stmt_leave->execute();
-$leave_result = $stmt_leave->get_result();
-$leave_days = (int)($leave_result->fetch_assoc()['leave_days'] ?? 0);
-
-$absent_days = max(0, $totalWorkingDays - ($present_days + $leave_days));
-
-// Calculate payslip data based on attendance using basic_salary as base
-$daily_rate = $basic_salary / $totalWorkingDays;
-$pro_rated_basic_salary = $daily_rate * $present_days; // Pro-rated based on present days
-$allowances = ($basic_salary * 0.3) * ($present_days / $totalWorkingDays); // 30% of basic_salary, pro-rated
-$overtime_rate = ($basic_salary / ($totalWorkingDays * 8)) * 1.5; // 1.5x hourly rate for 8-hour day
-$overtime_pay = $total_overtime_hours * $overtime_rate;
-$ssf_deduction = $pro_rated_basic_salary * 0.11; // 11% SSF on pro-rated basic salary
-$pf_deduction = $pro_rated_basic_salary * 0.05; // 5% PF on pro-rated basic salary
-$other_deduction = $pro_rated_basic_salary * 0.05; // 5% other deduction
-$deductions = $ssf_deduction + $pf_deduction + $other_deduction;
-$net_salary = $pro_rated_basic_salary + $allowances + $overtime_pay - $deductions;
-$paid = 0; // Assume unpaid unless integrated with payment data
-$payment_date = null;
-
-$currentPayslipData = [
-    'basic_salary' => $pro_rated_basic_salary,
-    'allowances' => $allowances,
-    'overtime_pay' => $overtime_pay,
-    'ssf_deduction' => $ssf_deduction,
-    'pf_deduction' => $pf_deduction,
-    'deductions' => $deductions,
-    'net_salary' => $net_salary,
-    'paid' => $paid,
-    'payment_date' => $payment_date,
-    'month' => sprintf("%d-%02d", $currentYear, $currentMonth), // e.g., "2025-06"
-    'present_days' => $present_days,
-    'leave_days' => $leave_days,
-    'absent_days' => $absent_days,
-    'total_overtime_hours' => $total_overtime_hours,
-];
-
-$allMonths = range(1, 12);
-
-// Define getMonthName function
-function getMonthName($monthNum)
-{
-    return date("F", mktime(0, 0, 0, (int)$monthNum, 10));
+function getMonthName($m) {
+    return date("F", mktime(0, 0, 0, $m, 10));
 }
 ?>
 
@@ -103,87 +51,93 @@ function getMonthName($monthNum)
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>My Payslips</title>
+    <title>My Payslip</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="./assets/css/style.css" rel="stylesheet" />
 </head>
 <body>
-    <?php include 'includes/sidebar.php'; ?>
+    <?php include './includes/sidebar.php'; ?>
 
     <div class="content">
         <?php include './includes/header.php'; ?>
         <div class="container my-5">
-            <h2>My Payslips for <?= htmlspecialchars($fullName) ?></h2>
+            <h2>My Payslip - <?= htmlspecialchars($fullName) ?></h2>
 
-            <div class="mt-4">
-                <h5>View Payslip By Month (Year <?= htmlspecialchars($currentYear) ?>)</h5>
-                <div class="mb-3">
-                    <?php foreach ($allMonths as $monthNum): ?>
-                        <?php $monthName = getMonthName($monthNum); ?>
-                        <a href="?month=<?= $monthNum ?>" class="btn btn-outline-primary me-2 mb-2">
-                            <?= htmlspecialchars($monthName) ?>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
+            <div class="my-4">
+                <h5>View Payslip by Month - <?= $currentYear ?></h5>
+                <?php for ($m = 1; $m <= 12; $m++): ?>
+                    <a href="?month=<?= $m ?>" class="btn btn-outline-primary mb-2 me-2 <?= $m == $currentMonth ? 'active' : '' ?>">
+                        <?= getMonthName($m) ?>
+                    </a>
+                <?php endfor; ?>
             </div>
 
-            <div class="card shadow-sm p-4 mt-3">
-                <h5>Current Month (<?= htmlspecialchars(getMonthName($currentMonth)) ?> <?= htmlspecialchars($currentYear) ?>)</h5>
-                <?php if ($currentPayslipData): ?>
+            <div class="card p-4 shadow-sm">
+                <h5 class="mb-3">Payslip for <?= getMonthName($currentMonth) ?> <?= $currentYear ?></h5>
+
+                <?php if ($payslip_data): ?>
                     <table class="table table-bordered">
                         <tbody>
                             <tr>
                                 <th>Present Days</th>
-                                <td><?= htmlspecialchars($currentPayslipData['present_days']) ?></td>
+                                <td><?= htmlspecialchars($payslip_data['total_present_days']) ?></td>
                             </tr>
                             <tr>
                                 <th>Leave Days</th>
-                                <td><?= htmlspecialchars($currentPayslipData['leave_days']) ?></td>
+                                <td><?= htmlspecialchars($payslip_data['total_leave_days']) ?></td>
                             </tr>
                             <tr>
                                 <th>Absent Days</th>
-                                <td><?= htmlspecialchars($currentPayslipData['absent_days']) ?></td>
+                                <td><?= htmlspecialchars($payslip_data['total_absent_days']) ?></td>
                             </tr>
                             <tr>
                                 <th>Total Overtime Hours</th>
-                                <td><?= htmlspecialchars($currentPayslipData['total_overtime_hours']) ?></td>
+                                <td><?= htmlspecialchars($payslip_data['overtime_hours']) ?> hrs</td>
                             </tr>
                             <tr>
                                 <th>Basic Salary</th>
-                                <td>Rs. <?= number_format($currentPayslipData['basic_salary'], 2) ?></td>
+                                <td>Rs. <?= number_format($payslip_data['gross_salary'] - $payslip_data['festival_bonus'] - $payslip_data['overtime_pay'], 2) ?></td>
                             </tr>
                             <tr>
-                                <th>Allowances</th>
-                                <td>Rs. <?= number_format($currentPayslipData['allowances'], 2) ?></td>
+                                <th>Festival Bonus</th>
+                                <td>Rs. <?= number_format($payslip_data['festival_bonus'], 2) ?></td>
                             </tr>
                             <tr>
                                 <th>Overtime Pay</th>
-                                <td>Rs. <?= number_format($currentPayslipData['overtime_pay'], 2) ?></td>
+                                <td>Rs. <?= number_format($payslip_data['overtime_pay'], 2) ?></td>
                             </tr>
                             <tr>
-                                <th>SSF Deduction</th>
-                                <td>Rs. <?= number_format($currentPayslipData['ssf_deduction'], 2) ?></td>
+                                <th>Gross Salary</th>
+                                <td><strong>Rs. <?= number_format($payslip_data['gross_salary'], 2) ?></strong></td>
                             </tr>
                             <tr>
-                                <th>PF Deduction</th>
-                                <td>Rs. <?= number_format($currentPayslipData['pf_deduction'], 2) ?></td>
+                                <th>SSF Deduction (Employee)</th>
+                                <td>Rs. <?= number_format($payslip_data['ssf_employee'], 2) ?></td>
                             </tr>
                             <tr>
-                                <th>Other Deductions</th>
-                                <td>Rs. <?= number_format($currentPayslipData['deductions'] - $currentPayslipData['ssf_deduction'] - $currentPayslipData['pf_deduction'], 2) ?></td>
+                                <th>PF Deduction (Employee)</th>
+                                <td>Rs. <?= number_format($payslip_data['pf_employee'], 2) ?></td>
                             </tr>
                             <tr>
+                                <th>Tax Deduction</th>
+                                <td>Rs. <?= number_format($payslip_data['tax_deduction'], 2) ?></td>
+                            </tr>
+                            <tr class="table-info">
                                 <th>Net Salary</th>
-                                <td><strong>Rs. <?= number_format($currentPayslipData['net_salary'], 2) ?></strong></td>
+                                <td><strong>Rs. <?= number_format($payslip_data['net_salary'], 2) ?></strong></td>
                             </tr>
                             <tr>
                                 <th>Status</th>
-                                <td><span class="badge <?= $currentPayslipData['paid'] ? 'bg-success' : 'bg-warning text-dark' ?>"><?= $currentPayslipData['paid'] ? 'Paid' : 'Need to Pay' ?></span></td>
+                                <td>
+                                    <span class="badge <?= $payslip_data['status'] === 'Paid' ? 'bg-success' : 'bg-warning text-dark' ?>">
+                                        <?= htmlspecialchars($payslip_data['status']) ?>
+                                    </span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 <?php else: ?>
-                    <p>No salary data calculated for this month.</p>
+                    <div class="alert alert-info">No payslip found for <?= getMonthName($currentMonth) ?> <?= $currentYear ?>.</div>
                 <?php endif; ?>
             </div>
         </div>
@@ -193,9 +147,4 @@ function getMonthName($monthNum)
 </body>
 </html>
 
-<?php
-$stmt_emp->close();
-$stmt_att->close();
-$stmt_leave->close();
-$con->close();
-?>
+<?php $con->close(); ?>
