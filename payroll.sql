@@ -18,12 +18,14 @@ CREATE TABLE `admins` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Insert Admin Data (fixed duplicates)
+-- Insert Admin Data 
 INSERT INTO `admins` (`id`, `username`, `full_name`, `email`, `phone`, `password`, `profile_image`, `user_type`, `created_at`)
 VALUES
 (1, 'admin1', 'Pawon Shrestha', 'pawon@mail.com', '9808420035', '$2y$10$RjWfw7CR4iRphyt483zPseYL51SYew0JHzCTPnAY7X.LmaZ/zpJB6', 'default.png', 'Admin', '2025-06-09 09:05:00'),
 (2, 'admin2', 'Pujan Tandukar', 'pujan@mail.com', '9808445785', '$2y$10$RjWfw7CR4iRphyt483zPseYL51SYew0JHzCTPnAY7X.LmaZ/zpJB6', 'default.png', 'Admin', '2025-06-09 09:05:00');
 -- Password = admin123
+
+
 
 -- Employees Table (added leave_balance, marital_status)
 CREATE TABLE employees (
@@ -130,3 +132,89 @@ CREATE TABLE audit_logs (
     FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE SET NULL,
     FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--insert for attendance 
+
+INSERT INTO attendance (employee_id, date, check_in, check_out, status, overtime_hours)
+SELECT 
+    employee_id,
+    date,
+    CASE 
+        WHEN DAYOFWEEK(date) = 1 THEN NULL -- Sunday
+        WHEN DAYOFWEEK(date) = 7 THEN NULL -- Saturday
+        WHEN employee_id = 'EMP0002' THEN '12:00:00'
+        ELSE '10:00:00'
+    END AS check_in,
+    CASE 
+        WHEN DAYOFWEEK(date) = 1 THEN NULL -- Sunday
+        WHEN DAYOFWEEK(date) = 7 THEN NULL -- Saturday
+        WHEN employee_id = 'EMP0002' AND date = '2025-06-20' THEN '16:36:00'
+        WHEN employee_id = 'EMP0002' THEN '18:30:00'
+        WHEN date = '2025-06-20' THEN '16:30:00'
+        ELSE '18:00:00'
+    END AS check_out,
+    CASE 
+        WHEN DAYOFWEEK(date) IN (1, 7) THEN 'Absent'
+        ELSE 'Present'
+    END AS status,
+    0 AS overtime_hours
+FROM (
+    SELECT 'EMP0001' AS employee_id
+    UNION
+    SELECT 'EMP0002' AS employee_id
+    UNION
+    SELECT 'EMP0003' AS employee_id
+) employees
+CROSS JOIN (
+    SELECT DATE('2025-03-01') + INTERVAL (n) DAY AS date
+    FROM (
+        SELECT a.N + b.N * 10 + c.N * 100 AS n
+        FROM (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a
+        CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b
+        CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) c
+    ) numbers
+    WHERE DATE('2025-03-01') + INTERVAL (n) DAY <= '2025-06-20'
+) dates;
+
+

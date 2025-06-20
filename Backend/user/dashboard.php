@@ -116,7 +116,7 @@ $net_salary = $basic_pay + $allowances - $deductions;
 
             // Only show payslips with a positive salary
             if ($net_salary > 0) {
-              echo '<li class="list-group-item payslip-item" data-month="' . $month . '">' . $month . ' - $' . number_format($net_salary, 2) . '</li>';
+              echo '<li class="list-group-item payslip-item" data-month="' . $month . '">' . $month . ' - Rs.' . number_format($net_salary, 2) . '</li>';
               $hasValidPayslip = true;
             }
           }
