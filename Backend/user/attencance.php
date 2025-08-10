@@ -19,22 +19,34 @@ $stmt_today->execute();
 $todays_attendance = $stmt_today->get_result()->fetch_assoc();
 $stmt_today->close();
 
-// Handle Check-In / Check-Out
+// Define automatic check-out time (7 PM)
+$auto_checkout_time = '19:00:00';
+
+// Auto check-out if past 5 PM and no check_out recorded yet
+if ($todays_attendance && empty($todays_attendance['check_out']) && $current_time >= $auto_checkout_time) {
+    $checkout_time_to_set = $auto_checkout_time; // Or use $current_time for exact current time
+
+    $update_checkout = $con->prepare("UPDATE attendance SET check_out = ? WHERE id = ?");
+    $update_checkout->bind_param("si", $checkout_time_to_set, $todays_attendance['id']);
+    $update_checkout->execute();
+    $update_checkout->close();
+
+    // Update local copy so UI shows correct info
+    $todays_attendance['check_out'] = $checkout_time_to_set;
+}
+
+// Handle Check-In
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['check_in']) && !$todays_attendance) {
         $insert = $con->prepare("INSERT INTO attendance (employee_id, date, check_in, status) VALUES (?, ?, ?, 'Present')");
         $insert->bind_param("sss", $employee_id, $today, $current_time);
         $insert->execute();
         $insert->close();
+        
+        // Refresh page to reload today's attendance info
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
     }
-    if (isset($_POST['check_out']) && $todays_attendance && empty($todays_attendance['check_out'])) {
-        $update = $con->prepare("UPDATE attendance SET check_out = ? WHERE id = ?");
-        $update->bind_param("si", $current_time, $todays_attendance['id']);
-        $update->execute();
-        $update->close();
-    }
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit();
 }
 
 // Get current week's Monday and Sunday
@@ -55,10 +67,10 @@ $stmt->close();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Attendance</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="./assets/css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="./assets/css/style.css" rel="stylesheet" />
 </head>
 <body>
 
@@ -71,7 +83,7 @@ $stmt->close();
     <h2 class="mb-0">My Attendance</h2>
     <form method="POST">
       <button type="submit" name="check_in" class="btn btn-success me-2" <?= $todays_attendance ? 'disabled' : '' ?>>Check In</button>
-      <button type="submit" name="check_out" class="btn btn-danger" <?= !$todays_attendance || !empty($todays_attendance['check_out']) ? 'disabled' : '' ?>>Check Out</button>
+      <!-- Check Out button removed as requested -->
     </form>
   </div>
 
@@ -101,7 +113,6 @@ $stmt->close();
               $check_in = '-';
               $check_out = '-';
               $status = '-';
-              $badge_class = '';
 
               if(isset($week_map[$day_str])) {
                   $record = $week_map[$day_str];

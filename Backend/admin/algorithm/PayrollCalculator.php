@@ -240,7 +240,6 @@ class PayrollCalculator {
             'pf_employer' => $pf['employer'],
             'tax_deduction' => $this->calculateTax(),
             'net_salary' => $this->calculateNetSalary(),
-            'status' => 'Paid'
         ];
     }
 }

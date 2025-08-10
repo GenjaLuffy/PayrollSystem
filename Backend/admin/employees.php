@@ -64,9 +64,15 @@ $result = $con->query($sql);
                                     <td><?= htmlspecialchars($row['department']) ?></td>
                                     <td><?= htmlspecialchars($row['role']) ?></td>
                                     <td>
+                                        <a href="edit_employee.php?employee_id=<?= urlencode($row['employee_id']) ?>" 
+                                           class="btn btn-sm btn-warning me-1">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
                                         <a href="employees.php?delete_id=<?= urlencode($row['employee_id']) ?>" 
                                            class="btn btn-sm btn-danger" 
-                                           onclick="return confirm('Are you sure you want to delete this employee?')">Delete</a>
+                                           onclick="return confirm('Are you sure you want to delete this employee?')">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </a>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>

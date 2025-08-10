@@ -11,10 +11,36 @@ if (!$employeeId || !$monthYear) {
 }
 
 [$year, $month] = explode('-', $monthYear);
+$monthYearStr = sprintf("%d-%02d", (int)$year, (int)$month);
+
+// Check payment status
+$status = 'Pending'; // default
+
+$check_sql = "SELECT status FROM payslips WHERE employee_id = ? AND month = ?";
+$stmt = $con->prepare($check_sql);
+$stmt->bind_param("ss", $employeeId, $monthYearStr);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($row = $result->fetch_assoc()) {
+    if (strtolower($row['status']) === 'paid') {
+        $status = 'Paid';
+    }
+}
+$stmt->close();
 
 try {
     $payroll = new PayrollCalculator($con, $employeeId, (int)$month, (int)$year);
-    $preview = $payroll->generatePayslip();// You need to implement this if not available
+    $preview = $payroll->generatePayslip(); // Make sure this returns an array of key-value pairs
+
+    // Show status on top
+    echo "<div class='mb-3'>";
+    if ($status === 'Paid') {
+        echo "<span class='badge bg-success'>Status: Paid</span>";
+    } else {
+        echo "<span class='badge bg-warning text-dark'>Status: Pending</span>";
+    }
+    echo "</div>";
 
     echo "<ul class='list-group'>";
     foreach ($preview as $key => $value) {

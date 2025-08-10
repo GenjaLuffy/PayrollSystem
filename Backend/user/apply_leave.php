@@ -33,6 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "End date cannot be before start date.";
     }
 
+    // Custom leave duration validation
+    if (empty($errors) && $start_date && $end_date) {
+        $start = new DateTime($start_date);
+        $end = new DateTime($end_date);
+        $interval = $start->diff($end)->days + 1; // Inclusive of both start and end dates
+
+        if ($leave_type === 'Sick Leave' && $interval > 2) {
+            $errors[] = "Sick Leave can be for a maximum of 2 days.";
+        }
+        if ($leave_type === 'Paid Leave' && ($interval < 1 || $interval > 2)) {
+            $errors[] = "Paid Leave must be 1 or 2 days only.";
+        }
+    }
+
     if (empty($errors)) {
         // Insert into DB
         $sql = "INSERT INTO leave_requests (employee_id, leave_type, start_date, end_date, reason) VALUES (?, ?, ?, ?, ?)";
@@ -87,9 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <select class="form-select" id="leave_type" name="leave_type" required>
                         <option value="" <?= (isset($_POST['leave_type']) && $_POST['leave_type'] == '') ? 'selected' : '' ?>>Select leave type</option>
                         <option value="Sick Leave" <?= (isset($_POST['leave_type']) && $_POST['leave_type'] == 'Sick Leave') ? 'selected' : '' ?>>Sick Leave</option>
+                        <option value="Paid Leave" <?= (isset($_POST['leave_type']) && $_POST['leave_type'] == 'Paid Leave') ? 'selected' : '' ?>>Paid Leave</option>
                         <option value="Annual Leave" <?= (isset($_POST['leave_type']) && $_POST['leave_type'] == 'Annual Leave') ? 'selected' : '' ?>>Annual Leave</option>
-                        <option value="Casual Leave" <?= (isset($_POST['leave_type']) && $_POST['leave_type'] == 'Casual Leave') ? 'selected' : '' ?>>Casual Leave</option>
-                        <!-- Add more leave types if needed -->
                     </select>
                 </div>
 
