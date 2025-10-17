@@ -120,17 +120,31 @@ CREATE TABLE salaries (
     FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- Leave Staus Table
+CREATE TABLE leave_status (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(20) NOT NULL,
+    leave_type VARCHAR(50) NOT NULL,
+    total_allocated INT DEFAULT 0,
+    used INT DEFAULT 0,
+    last_updated DATE,
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE,
+    UNIQUE(employee_id, leave_type)
+);
+
 
 -- Audit Logs Table
 CREATE TABLE audit_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    employee_id VARCHAR(20),
-    admin_id INT,
-    action VARCHAR(100),
+    employee_id VARCHAR(20) NULL,
+    admin_id INT NULL,
+    action VARCHAR(100) NOT NULL,
     details TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE SET NULL,
-    FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL
+    FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL,
+    INDEX idx_employee_id (employee_id),
+    INDEX idx_admin_id (admin_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
@@ -175,46 +189,42 @@ CREATE TABLE audit_logs (
 
 
 --insert for attendance 
-
 INSERT INTO attendance (employee_id, date, check_in, check_out, status, overtime_hours)
+WITH RECURSIVE dates AS (
+    SELECT DATE('2025-03-01') AS date
+    UNION ALL
+    SELECT DATE_ADD(date, INTERVAL 1 DAY)
+    FROM dates
+    WHERE DATE_ADD(date, INTERVAL 1 DAY) <= CURDATE()
+)
 SELECT 
-    employee_id,
-    date,
+    e.employee_id,
+    d.date,
     CASE 
-        WHEN DAYOFWEEK(date) = 1 THEN NULL -- Sunday
-        WHEN DAYOFWEEK(date) = 7 THEN NULL -- Saturday
-        WHEN employee_id = 'EMP0002' THEN '12:00:00'
-        ELSE '10:00:00'
+        WHEN DAYOFWEEK(d.date) IN (1,7) THEN NULL -- Sunday=1, Saturday=7
+        WHEN e.employee_id = 'EMP0002' THEN '12:00:00'
+        WHEN e.employee_id = 'EMP0004' THEN '13:00:00' -- Part-time
+        ELSE '10:00:00' -- Full-time
     END AS check_in,
     CASE 
-        WHEN DAYOFWEEK(date) = 1 THEN NULL -- Sunday
-        WHEN DAYOFWEEK(date) = 7 THEN NULL -- Saturday
-        WHEN employee_id = 'EMP0002' AND date = '2025-06-20' THEN '16:36:00'
-        WHEN employee_id = 'EMP0002' THEN '18:30:00'
-        WHEN date = '2025-06-20' THEN '16:30:00'
-        ELSE '18:00:00'
+        WHEN DAYOFWEEK(d.date) IN (1,7) THEN NULL
+        WHEN e.employee_id = 'EMP0002' AND d.date = '2025-06-20' THEN '16:36:00'
+        WHEN e.employee_id = 'EMP0002' THEN '18:30:00'
+        WHEN e.employee_id = 'EMP0004' THEN '18:00:00' -- Part-time check-out
+        ELSE '18:00:00' -- Full-time check-out
     END AS check_out,
     CASE 
-        WHEN DAYOFWEEK(date) IN (1, 7) THEN 'Absent'
+        WHEN DAYOFWEEK(d.date) IN (1,7) THEN 'Absent'
         ELSE 'Present'
     END AS status,
     0 AS overtime_hours
-FROM (
-    SELECT 'EMP0001' AS employee_id
-    UNION
-    SELECT 'EMP0002' AS employee_id
-    UNION
-    SELECT 'EMP0003' AS employee_id
-) employees
-CROSS JOIN (
-    SELECT DATE('2025-03-01') + INTERVAL (n) DAY AS date
-    FROM (
-        SELECT a.N + b.N * 10 + c.N * 100 AS n
-        FROM (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a
-        CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b
-        CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) c
-    ) numbers
-    WHERE DATE('2025-03-01') + INTERVAL (n) DAY <= '2025-06-20'
-) dates;
+FROM (SELECT 'EMP0001' AS employee_id
+      UNION ALL
+      SELECT 'EMP0002'
+      UNION ALL
+      SELECT 'EMP0003'
+      UNION ALL
+      SELECT 'EMP0004') e
+CROSS JOIN dates d;
 
 

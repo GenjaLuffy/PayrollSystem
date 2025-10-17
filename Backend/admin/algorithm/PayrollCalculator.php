@@ -1,7 +1,9 @@
 <?php
 include './includes/connect.php';
 
-// Constants
+// ================================
+// === Constants & Configurations ===
+// ================================
 define('MINIMUM_WAGE', 17300);
 define('SSF_EMPLOYEE_RATE', 0.11);
 define('SSF_EMPLOYER_RATE', 0.20);
@@ -18,6 +20,9 @@ $taxSlabs = [
     ['limit' => PHP_INT_MAX, 'rate' => 0.36],
 ];
 
+// ================================
+// === Payroll Calculator Class ===
+// ================================
 class PayrollCalculator {
     private $conn;
     private $employeeId;
@@ -32,6 +37,7 @@ class PayrollCalculator {
 
     private $presentDays = 0;
     private $leaveDaysTaken = 0;
+    private $halfPaidLeaveDays = 0;
     private $absentDays = 0;
     private $overtimeHours = 0;
 
@@ -45,6 +51,9 @@ class PayrollCalculator {
         $this->loadAttendanceData();
     }
 
+    // ======================
+    // === Load Employee Data ===
+    // ======================
     private function loadEmployeeData() {
         $sql = "SELECT salary, fullName FROM employees WHERE employee_id = ?";
         $stmt = $this->conn->prepare($sql);
@@ -65,9 +74,12 @@ class PayrollCalculator {
         $stmt->close();
     }
 
+    // ======================
+    // === Load Attendance & Leave Data ===
+    // ======================
     private function loadAttendanceData() {
-        // Leave days
-        $sql = "SELECT SUM(DATEDIFF(end_date, start_date) + 1) AS leave_days
+        // --- Full Paid Leave (Sick, Annual) ---
+        $sql = "SELECT SUM(DATEDIFF(end_date, start_date) + 1) AS full_paid_leave
                 FROM leave_requests
                 WHERE employee_id = ? AND status = 'Approved'
                 AND leave_type IN ('Sick', 'Annual')
@@ -76,10 +88,23 @@ class PayrollCalculator {
         $stmt->bind_param("sii", $this->employeeId, $this->month, $this->year);
         $stmt->execute();
         $result = $stmt->get_result();
-        $this->leaveDaysTaken = (int)($result->fetch_assoc()['leave_days'] ?? 0);
+        $fullPaidLeave = (int)($result->fetch_assoc()['full_paid_leave'] ?? 0);
         $stmt->close();
 
-        // Present days
+        // --- Half Paid Leave (Paternity, Bereavement) ---
+        $sql = "SELECT SUM(DATEDIFF(end_date, start_date) + 1) AS half_paid_leave
+                FROM leave_requests
+                WHERE employee_id = ? AND status = 'Approved'
+                AND leave_type IN ('Paternity', 'Bereavement')
+                AND MONTH(start_date) = ? AND YEAR(start_date) = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("sii", $this->employeeId, $this->month, $this->year);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $halfPaidLeave = (int)($result->fetch_assoc()['half_paid_leave'] ?? 0);
+        $stmt->close();
+
+        // --- Present Days ---
         $sql = "SELECT COUNT(*) AS present_days
                 FROM attendance
                 WHERE employee_id = ? AND MONTH(date) = ? AND YEAR(date) = ? AND status = 'Present'";
@@ -90,7 +115,7 @@ class PayrollCalculator {
         $this->presentDays = (int)($result->fetch_assoc()['present_days'] ?? 0);
         $stmt->close();
 
-        // Overtime hours
+        // --- Overtime Hours ---
         $sql = "SELECT SUM(overtime_hours) AS overtime_hours
                 FROM attendance
                 WHERE employee_id = ? AND MONTH(date) = ? AND YEAR(date) = ?
@@ -102,16 +127,30 @@ class PayrollCalculator {
         $this->overtimeHours = (float)($result->fetch_assoc()['overtime_hours'] ?? 0);
         $stmt->close();
 
+        // --- Store leave counts ---
+        $this->halfPaidLeaveDays = $halfPaidLeave;
+        $this->leaveDaysTaken = $fullPaidLeave + $halfPaidLeave;
+
+        // --- Absences ---
         $totalWorkDays = WORKING_DAYS_PER_MONTH;
         $this->absentDays = max(0, $totalWorkDays - ($this->presentDays + $this->leaveDaysTaken));
     }
 
+    // ======================
+    // === Salary Calculations ===
+    // ======================
     private function calculateBasicSalary() {
-        return round($this->basicSalaryPerDay * $this->presentDays, 2);
+        $fullPaid = $this->presentDays + ($this->leaveDaysTaken - $this->halfPaidLeaveDays);
+        $halfPaid = $this->halfPaidLeaveDays;
+        $salary = ($fullPaid * $this->basicSalaryPerDay) + ($halfPaid * $this->basicSalaryPerDay * 0.5);
+        return round($salary, 2);
     }
 
     private function calculateAllowances() {
-        return round($this->allowancePerDay * $this->presentDays, 2);
+        $fullPaid = $this->presentDays + ($this->leaveDaysTaken - $this->halfPaidLeaveDays);
+        $halfPaid = $this->halfPaidLeaveDays;
+        $allowance = ($fullPaid * $this->allowancePerDay) + ($halfPaid * $this->allowancePerDay * 0.5);
+        return round($allowance, 2);
     }
 
     private function calculateOvertimePay() {
@@ -127,6 +166,9 @@ class PayrollCalculator {
         );
     }
 
+    // ======================
+    // === Deductions ===
+    // ======================
     public function calculateSSF() {
         $basic = $this->calculateBasicSalary();
         return [
@@ -169,6 +211,9 @@ class PayrollCalculator {
         return round($tax / 12, 2); // monthly tax
     }
 
+    // ======================
+    // === Net Salary ===
+    // ======================
     public function calculateNetSalary() {
         return round(
             $this->calculateGrossSalary()
@@ -178,9 +223,12 @@ class PayrollCalculator {
         );
     }
 
+    // ======================
+    // === Payslip Generation ===
+    // ======================
     public function generateAndStorePayslip() {
-        if ($this->presentDays <= 0) {
-            throw new Exception("No present days. Cannot generate payslip.");
+        if ($this->presentDays <= 0 && $this->leaveDaysTaken <= 0) {
+            throw new Exception("No attendance or leave data. Cannot generate payslip.");
         }
 
         $gross = $this->calculateGrossSalary();
@@ -218,6 +266,9 @@ class PayrollCalculator {
         return $this->generatePayslip();
     }
 
+    // ======================
+    // === Generate Payslip Data (Array) ===
+    // ======================
     public function generatePayslip() {
         $ssf = $this->calculateSSF();
         $pf = $this->calculatePF();
@@ -227,7 +278,8 @@ class PayrollCalculator {
             'employee_name' => $this->employeeName,
             'month' => sprintf("%d-%02d", $this->year, $this->month),
             'present_days' => $this->presentDays,
-            'leave_days' => $this->leaveDaysTaken,
+            'full_paid_leave_days' => $this->leaveDaysTaken - $this->halfPaidLeaveDays,
+            'half_paid_leave_days' => $this->halfPaidLeaveDays,
             'absent_days' => $this->absentDays,
             'basic_salary' => $this->calculateBasicSalary(),
             'allowances' => $this->calculateAllowances(),

@@ -29,9 +29,9 @@ if (!$employee) {
 }
 $fullName = $employee['fullName'];
 
-// Fetch payslip
+// Fetch payslip (no festival_bonus column)
 $sql_payslip = "SELECT total_present_days, total_leave_days, total_absent_days, gross_salary, net_salary,
-                ssf_employee, ssf_employer, pf_employee, pf_employer, tax_deduction, festival_bonus,
+                ssf_employee, ssf_employer, pf_employee, pf_employer, tax_deduction,
                 overtime_pay, overtime_hours, status
                 FROM payslips
                 WHERE employee_id = ? AND month = ?";
@@ -95,14 +95,6 @@ function getMonthName($m) {
                                 <td><?= htmlspecialchars($payslip_data['overtime_hours']) ?> hrs</td>
                             </tr>
                             <tr>
-                                <th>Basic Salary</th>
-                                <td>Rs. <?= number_format($payslip_data['gross_salary'] - $payslip_data['festival_bonus'] - $payslip_data['overtime_pay'], 2) ?></td>
-                            </tr>
-                            <tr>
-                                <th>Festival Bonus</th>
-                                <td>Rs. <?= number_format($payslip_data['festival_bonus'], 2) ?></td>
-                            </tr>
-                            <tr>
                                 <th>Overtime Pay</th>
                                 <td>Rs. <?= number_format($payslip_data['overtime_pay'], 2) ?></td>
                             </tr>
@@ -137,7 +129,9 @@ function getMonthName($m) {
                         </tbody>
                     </table>
                 <?php else: ?>
-                    <div class="alert alert-info">No payslip found for <?= getMonthName($currentMonth) ?> <?= $currentYear ?>.</div>
+                    <div class="alert alert-info">
+                        No payslip found for <?= getMonthName($currentMonth) ?> <?= $currentYear ?>.
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
