@@ -148,9 +148,6 @@ $stmt->close();
 <?php include 'includes/header.php'; ?>
 
 <div class="container my-5" style="max-width: 800px;">
-    <div class="mt-5">
-        <a href="/leave.php" class="btn btn-success mt-3">See Leave Detail</a>
-    </div>
     <h2 class="mb-4 text-center">Apply for Leave</h2>
 
     <?php if ($success): ?>
@@ -200,31 +197,6 @@ $stmt->close();
             <button type="submit" class="btn btn-primary">Submit Leave Application</button>
         </div>
     </form>
-
-    <!-- Leave Status Table -->
-    <div class="mt-5">
-        <h4>Leave Status</h4>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Leave Type</th>
-                    <th>Total Allocated</th>
-                    <th>Used</th>
-                    <th>Remaining</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $leave_status_result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($row['leave_type']) ?></td>
-                        <td><?= $row['total_allocated'] ?></td>
-                        <td><?= $row['used'] ?></td>
-                        <td><?= $row['total_allocated'] - $row['used'] ?></td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    </div>
 </div>
 </div>
 
