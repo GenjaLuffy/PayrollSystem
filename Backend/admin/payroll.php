@@ -167,6 +167,18 @@ document.getElementById('processSalaryBtn').addEventListener('click', function (
     .then(response => response.text())
     .then(html => {
         document.getElementById('modalPreviewContent').innerHTML = html;
+        
+        // Disable confirm if already paid
+        const statusElem = document.getElementById('salaryStatus');
+        const confirmBtn = document.getElementById('confirmSalaryBtn');
+        if (statusElem && statusElem.value === 'Paid') {
+            confirmBtn.disabled = true;
+            confirmBtn.innerText = 'Already Paid';
+        } else {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="bi bi-check-circle"></i> Confirm & Pay';
+        }
+
         modal.show();
     })
     .catch(err => {
@@ -179,6 +191,7 @@ document.getElementById('processSalaryBtn').addEventListener('click', function (
 document.getElementById('confirmSalaryBtn').addEventListener('click', function () {
     document.getElementById('payrollForm').submit();
 });
+
 </script>
 </body>
 </html>

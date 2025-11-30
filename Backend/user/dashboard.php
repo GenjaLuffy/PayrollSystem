@@ -2,15 +2,22 @@
 session_start();
 include './includes/connect.php';
 
-$employee_id = $_SESSION['employee_id'] ?? null;
+// --- AES Decrypt Function ---
+function decryptAES($data) {
+    $key = '12345678901234567890123456789012'; // 32 chars
+    $iv  = '1234567890123456'; // 16 chars
+    $decrypted = openssl_decrypt($data, 'AES-256-CBC', $key, 0, $iv);
+    return $decrypted ?: 0; // return 0 if decryption fails
+}
 
+// --- Get logged-in employee ID ---
+$employee_id = $_SESSION['employee_id'] ?? null;
 if (!$employee_id) {
-    // redirect to login if not logged in
     header('Location: login.php');
     exit;
 }
 
-// Fetch employee details
+// --- Fetch employee details ---
 $sql_emp = "SELECT * FROM employees WHERE employee_id = ?";
 $stmt_emp = $con->prepare($sql_emp);
 $stmt_emp->bind_param("s", $employee_id);
@@ -23,7 +30,7 @@ if (!$employee) {
     exit;
 }
 
-// Attendance summary for current month
+// --- Attendance summary for current month ---
 $month_start = date('Y-m-01');
 $month_end = date('Y-m-t');
 
@@ -39,7 +46,7 @@ $stmt_att->execute();
 $result_att = $stmt_att->get_result();
 $attendance = $result_att->fetch_assoc();
 
-// Recent Payslips (last 3 months)
+// --- Recent Payslips (last 3 months) ---
 $sql_payslips = "SELECT month, net_salary FROM payslips WHERE employee_id = ? ORDER BY month DESC LIMIT 3";
 $stmt_payslips = $con->prepare($sql_payslips);
 $stmt_payslips->bind_param("s", $employee_id);
@@ -47,8 +54,9 @@ $stmt_payslips->execute();
 $result_payslips = $stmt_payslips->get_result();
 $payslips = $result_payslips->fetch_all(MYSQLI_ASSOC);
 
-// Calculate allowances and deductions (example placeholders)
-$basic_pay = $employee['salary'] ?? 0;
+// --- Calculate allowances and deductions for dashboard summary ---
+$basic_pay_encrypted = $employee['salary'] ?? 0;
+$basic_pay = (float)decryptAES($basic_pay_encrypted);
 $allowances = $basic_pay * 0.15; 
 $deductions = $basic_pay * 0.05; 
 $net_salary = $basic_pay + $allowances - $deductions;
@@ -86,7 +94,6 @@ $net_salary = $basic_pay + $allowances - $deductions;
       </div>
     </div>
 
-
     <!-- Attendance Card -->
     <div class="col-md-6 col-lg-3">
       <div class="card shadow-sm">
@@ -100,37 +107,53 @@ $net_salary = $basic_pay + $allowances - $deductions;
       </div>
     </div>
 
-   <!-- Recent Payslips Card -->
-<div class="col-md-6 col-lg-3">
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <h5 class="card-title">Recent Payslips</h5>
-      <ul class="list-group list-group-flush mb-3">
-        <?php
-        $hasValidPayslip = false;
-
-        if ($payslips) {
-          foreach ($payslips as $payslip) {
-            $month = htmlspecialchars($payslip['month']);
-            $net_salary = $payslip['net_salary'] ?? 0;
-
-            // Only show payslips with a positive salary
-            if ($net_salary > 0) {
-              echo '<li class="list-group-item payslip-item" data-month="' . $month . '">' . $month . ' - Rs.' . number_format($net_salary, 2) . '</li>';
-              $hasValidPayslip = true;
-            }
-          }
-        }
-
-        if (!$hasValidPayslip) {
-          echo '<li class="list-group-item">No valid payslips found.</li>';
-        }
-        ?>
-      </ul>
-      <a href="#" class="btn btn-primary btn-sm">View All</a>
+    <!-- Salary Summary Card -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Salary Summary</h5>
+          <p><strong>Basic Pay:</strong> Rs. <?= number_format($basic_pay, 2) ?></p>
+          <p><strong>Allowances:</strong> Rs. <?= number_format($allowances, 2) ?></p>
+          <p><strong>Deductions:</strong> Rs. <?= number_format($deductions, 2) ?></p>
+          <p><strong>Net Salary:</strong> Rs. <?= number_format($net_salary, 2) ?></p>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+
+    <!-- Recent Payslips Card -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Recent Payslips</h5>
+          <ul class="list-group list-group-flush mb-3">
+            <?php
+            $hasValidPayslip = false;
+
+            if ($payslips) {
+                foreach ($payslips as $payslip) {
+                    $month = htmlspecialchars($payslip['month']);
+                    $encrypted_salary = $payslip['net_salary'] ?? 0;
+
+                    // Decrypt salary
+                    $net_salary = (float)decryptAES($encrypted_salary);
+
+                    if ($net_salary > 0) {
+                        echo '<li class="list-group-item payslip-item" data-month="' . $month . '">' 
+                             . $month . ' - Rs.' . number_format($net_salary, 2) . '</li>';
+                        $hasValidPayslip = true;
+                    }
+                }
+            }
+
+            if (!$hasValidPayslip) {
+                echo '<li class="list-group-item">No valid payslips found.</li>';
+            }
+            ?>
+          </ul>
+          <a href="#" class="btn btn-primary btn-sm">View All</a>
+        </div>
+      </div>
+    </div>
 
   </div>
 </div>

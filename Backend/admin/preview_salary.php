@@ -5,52 +5,29 @@ include './algorithm/PayrollCalculator.php';
 $employeeId = $_POST['employee_id'] ?? '';
 $monthYear = $_POST['month_year'] ?? '';
 
-if (!$employeeId || !$monthYear) {
-    echo "<p class='text-danger'>Missing employee or month.</p>";
-    exit;
-}
+if (!$employeeId || !$monthYear) { echo "Missing employee or month."; exit; }
 
-[$year, $month] = explode('-', $monthYear);
-$monthYearStr = sprintf("%d-%02d", (int)$year, (int)$month);
-
-// Check payment status
-$status = 'Pending'; // default
-
-$check_sql = "SELECT status FROM payslips WHERE employee_id = ? AND month = ?";
-$stmt = $con->prepare($check_sql);
-$stmt->bind_param("ss", $employeeId, $monthYearStr);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($row = $result->fetch_assoc()) {
-    if (strtolower($row['status']) === 'paid') {
-        $status = 'Paid';
-    }
-}
-$stmt->close();
+[$year,$month]=explode('-',$monthYear);
 
 try {
     $payroll = new PayrollCalculator($con, $employeeId, (int)$month, (int)$year);
-    $preview = $payroll->generatePayslip(); // Make sure this returns an array of key-value pairs
+    $preview = $payroll->generatePayslip();
 
-    // Show status on top
-    echo "<div class='mb-3'>";
-    if ($status === 'Paid') {
-        echo "<span class='badge bg-success'>Status: Paid</span>";
-    } else {
-        echo "<span class='badge bg-warning text-dark'>Status: Pending</span>";
-    }
-    echo "</div>";
+    function fmt($value){ return is_numeric($value)?number_format($value,2):htmlspecialchars($value); }
 
+    $deductions=['ssf_employee','ssf_employer','pf_employee','pf_employer','tax_deduction'];
     echo "<ul class='list-group'>";
-    foreach ($preview as $key => $value) {
+    foreach($preview as $key=>$value){
+        $cls=in_array($key,$deductions)?'text-danger':'text-success';
+        if(in_array($key,['employee_id','employee_name','month','present_days','full_paid_leave_days','half_paid_leave_days','absent_days','overtime_hours'])) $cls='';
         echo "<li class='list-group-item d-flex justify-content-between'>
-                <strong>" . htmlspecialchars(ucwords(str_replace('_', ' ', $key))) . "</strong>
-                <span>" . htmlspecialchars($value) . "</span>
+                <strong>".ucwords(str_replace('_',' ',$key))."</strong>
+                <span class='$cls'>".fmt($value)."</span>
               </li>";
     }
     echo "</ul>";
-} catch (Exception $e) {
-    echo "<p class='text-danger'>Error: " . $e->getMessage() . "</p>";
+    echo "<input type='hidden' id='salaryStatus' value='Pending'>";
+} catch(Exception $e){
+    echo "<p class='text-danger'>".$e->getMessage()."</p>";
 }
 ?>

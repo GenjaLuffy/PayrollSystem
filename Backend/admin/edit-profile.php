@@ -143,11 +143,6 @@ if (!$admin) {
             <select class="form-select" id="role" name="role" required>
               <option value="Admin" <?= ($admin['user_type'] === 'Admin') ? 'selected' : '' ?>>Admin
               </option>
-              <option value="Manager" <?= ($admin['user_type'] === 'Manager') ? 'selected' : '' ?>>Manager
-              </option>
-              <option value="Super Admin"
-                <?= ($admin['user_type'] === 'Super Admin') ? 'selected' : '' ?>>Super Admin
-              </option>
               <option value="Super Admin"
                 <?= ($admin['user_type'] === 'Super Admin') ? 'selected' : '' ?>>User
               </option>
